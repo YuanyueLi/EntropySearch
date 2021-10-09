@@ -1,0 +1,6 @@
+numpy
+pandas
+scipy
+flask
+flask_cors
+cython
