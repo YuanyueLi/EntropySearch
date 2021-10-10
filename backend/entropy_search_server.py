@@ -3,7 +3,7 @@ import multiprocessing
 from multiprocessing import Process
 from multiprocessing.queues import Queue
 
-from entropy_search import main as entropy_search_main
+from entropy_search_terminal import main as entropy_search_main
 
 
 
