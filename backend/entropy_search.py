@@ -1,35 +1,40 @@
-import webview
+import sys
+import multiprocessing
+import json
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from mimas.spectra.similarity import tools_fast
+
+from entropy_search_server import EntropySearchServer
+
+######################################################
+app = Flask(__name__)
+CORS(app)
+server = EntropySearchServer()
+
+@app.route("/entropy_search_parameter", methods=['POST'])
+def mass_search():
+    parameter = json.loads(request.data)
+    server.start_search(parameter)
+    print("Start search!")
+    return jsonify({"output": server.get_output()})
 
 
-def open_file_dialog(window):
-    file_types = ('Image Files (*.bmp;*.jpg;*.gif)', 'All files (*.*)')
-    result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=True, file_types=file_types)
-    print(result)
+@app.route("/get_result", methods=['POST'])
+def get_result():
+    return jsonify({"is_finished": server.is_finished(), "output": server.get_output()})
 
 
-class Api:
-    def select_file_for_spectral_file(self):
-        file_types = ('Spectral files (*.msp;*.mgf;*.mzML)')
-        filename = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=file_types)
-        if not filename:
-            return ""
-        return filename
-
-    def select_file_for_spectral_library(self):
-        file_types = ('MSP files (*.msp)')
-        filename = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=file_types)
-        if not filename:
-            return ""
-        return filename
-
-    def save_file_path(self):
-        filename = webview.windows[0].create_file_dialog(webview.SAVE_DIALOG)
-        if not filename:
-            return ""
-        return filename
+@app.route("/stop", methods=['POST'])
+def stop():
+    server.stop()
+    return jsonify({"state": "ok"})
 
 
-if __name__ == '__main__':
-    window = webview.create_window('Entropy search', '../frontend/build/index.html', js_api=Api(),
-                                   width=800, height=610)
-    webview.start()
+if __name__ == "__main__":
+    if sys.platform.startswith('win'):
+        # On Windows calling this function is necessary.
+        multiprocessing.freeze_support()
+    print("Start!")
+    app.run(host='127.0.0.1', port=8765)
+    print("Finished!")

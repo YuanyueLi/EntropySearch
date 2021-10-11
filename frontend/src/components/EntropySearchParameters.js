@@ -11,9 +11,9 @@ const EntropySearchParameters = () => {
     const history = useHistory();
     const [form] = Form.useForm();
     const defaultValues = {
-        file_search: "D:\\test\\db\\test.msp",
-        file_library: "D:\\test\\db\\test.msp",
-        file_output: "D:\\test\\db\\test.result.csv",
+        file_search: "",
+        file_library: "",
+        file_output: "",
         ms1_ppm: 10,
         ms2_da: 0.05,
         noise: 0.01,
@@ -27,6 +27,7 @@ const EntropySearchParameters = () => {
     const validateMessages = {
         required: "Please input '${label}'",
     };
+    const [stateEnableFinish, setEnableFinish] = useState(true)
 
     const postSearchParameter = useRequest((data) => {
         return {
@@ -36,13 +37,14 @@ const EntropySearchParameters = () => {
         manual: true,
         onSuccess: (result, params) => {
             console.log(result)
-            history.push("/result")
         },
     });
 
     const onFinish = (values) => {
         //console.log('Success:', values);
+        setEnableFinish(false)
         postSearchParameter.run(values)
+        history.push("/result")
     };
 
     return <>
@@ -102,7 +104,7 @@ const EntropySearchParameters = () => {
                             <InputNumber min={0} max={1} step={0.1}/>
                         </Form.Item>
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
-                            <Button type="primary" htmlType="submit">
+                            <Button type="primary" htmlType="submit" disabled={stateEnableFinish}>
                                 Start
                             </Button>
                         </Form.Item>

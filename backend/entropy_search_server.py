@@ -6,7 +6,6 @@ from multiprocessing.queues import Queue
 from entropy_search_terminal import main as entropy_search_main
 
 
-
 def run_function_with_output_to_queue(func, args, queue):
     stdout = sys.stdout
     sys.stdout = queue
@@ -46,6 +45,8 @@ class EntropySearchServer:
         return
 
     def get_output(self):
+        if self.is_finished():
+            self.thread = None
         try:
             while not self.output_queue.empty():
                 output_str = self.output_queue.get_nowait()

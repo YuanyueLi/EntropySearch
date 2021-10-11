@@ -9,7 +9,12 @@
   "license": "MIT",
   "build": {
     "win": {
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "portable"
+        }
+      ]
     }
   },
   "dependencies": {
