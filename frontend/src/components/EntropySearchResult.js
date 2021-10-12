@@ -24,6 +24,14 @@ const EntropySearchResult = () => {
             }
             console.log(result)
             setOutput(result.output)
+        },
+        onError:(e)=>{
+            console.log(e)
+            postGetResult.cancel()
+            Modal.error({
+                title: "Error!",
+                centered: true
+            })
         }
     })
 

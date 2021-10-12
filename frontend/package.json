@@ -15,7 +15,16 @@
           "target": "portable"
         }
       ]
-    }
+    },
+    "extraFiles": [
+      {
+        "from": "../backend/dist/",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "dependencies": {
     "ahooks": "^2.10.11",

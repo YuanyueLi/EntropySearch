@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider} from 'antd';
+import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {useRequest} from 'ahooks';
 import {useHistory} from "react-router-dom";
@@ -38,6 +38,12 @@ const EntropySearchParameters = () => {
         onSuccess: (result, params) => {
             console.log(result)
         },
+        onError: () => {
+            Modal.error({
+                title: "Error!",
+                centered: true
+            })
+        }
     });
 
     const onFinish = (values) => {
@@ -104,7 +110,7 @@ const EntropySearchParameters = () => {
                             <InputNumber min={0} max={1} step={0.1}/>
                         </Form.Item>
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
-                            <Button type="primary" htmlType="submit" disabled={stateEnableFinish}>
+                            <Button type="primary" htmlType="submit" disabled={!stateEnableFinish}>
                                 Start
                             </Button>
                         </Form.Item>

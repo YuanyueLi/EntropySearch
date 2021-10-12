@@ -45,8 +45,6 @@ class EntropySearchServer:
         return
 
     def get_output(self):
-        if self.is_finished():
-            self.thread = None
         try:
             while not self.output_queue.empty():
                 output_str = self.output_queue.get_nowait()
@@ -65,6 +63,8 @@ class EntropySearchServer:
         if self.thread is None:
             return True
         else:
+            if self.thread.pid is None:
+                return False
             self.thread.join(0.1)
             if self.thread.exitcode is None:
                 return False
