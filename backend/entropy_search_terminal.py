@@ -62,9 +62,9 @@ if __name__ == '__main__':
         "noise": 0.01,
         "clean_spectra": True,
 
-        'file_search': r"D:\test\db\test.msp",
-        "file_library": r"D:\test\db\test.msp",
-        'file_output': r"D:\test\db\test.csv",
+        'file_search': r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.mzML.gz",
+        "file_library": r"D:\test\spectra_example\database\MoNA-export-Experimental_Spectra.msp",
+        'file_output': r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.csv",
     }
     para_untarget_hybrid = {
         "method": "untarget-hybrid",

@@ -12,6 +12,7 @@ app = Flask(__name__)
 CORS(app)
 server = EntropySearchServer()
 
+
 @app.route("/entropy_search_parameter", methods=['POST'])
 def mass_search():
     parameter = json.loads(request.data)

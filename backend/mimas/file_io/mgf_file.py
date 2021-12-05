@@ -19,7 +19,6 @@ def _parse_info(info):
         except ValueError:
             result = dict(precursor_mz=float(value.split()[0]))
 
-
     elif info == 'CHARGE':
         _charge_dict = {'-': -1, '+': 1}
         if value[-1] in _charge_dict:
@@ -52,7 +51,7 @@ def read(stream_input):
     return exp
 
 
-def read_one_spectrum(filename_input: str, include_raw=0) -> dict:
+def read_one_spectrum(filename_input: str, include_raw=0, **kwargs) -> dict:
     fi = open(filename_input, "rt")
     raw = []
     scan_number = 1

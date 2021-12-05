@@ -30,10 +30,10 @@ def read_one_spectrum(filename_input: str, file_type: object = None, ms2_only=Fa
     :param kwargs:
     :return: a dictionary contains the following items:
         ms_level: 1, 2, 3, ...
-        peaks: list or numpy array
+        peaks: list or numpy array, For mzML file, it is a numpy array.
         precursor_mz: float or None
-        _scan_number: start from 1
-        rt: retention time
+        _scan_number: start from 1, int
+        rt: retention time, float or None. For mzML file, it is in second. For msp/mgf formats, it is the same as in the original file.
     """
     if file_type is None:
         file_type = guess_file_type_from_file_name(filename_input)
@@ -142,6 +142,20 @@ def standardize_spectrum(spec_info: dict, standardize_info: dict):
         for key_candidate in key_all_candidates:
             if key_candidate in spec_info:
                 spec_info.pop(key_candidate)
+
+
+def check_spectral_items(spec_info: dict, check_keys: list):
+    """
+    Check if the keys in check_keys are in spec_info
+    :param spec_info: spectrum info to check
+    :param check_keys: keys to check
+    """
+    for k in check_keys:
+        if k not in spec_info:
+            return False
+        if spec_info[k] is None:
+            return False
+    return True
 
 
 class SpecFile:

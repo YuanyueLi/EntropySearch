@@ -1,6 +1,6 @@
 {
   "name": "entropy_search",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GUI for Entropy Search",
   "main": "public/electron.js",
   "private": false,
@@ -33,7 +33,7 @@
     "test": "craco test",
     "eject": "craco eject",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "craco build && electron-builder"
   },
   "eslintConfig": {
     "extends": [

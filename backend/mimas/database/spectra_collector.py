@@ -56,7 +56,7 @@ class SpectraCollector:
         spec_file.standardize_spectrum(spec_info, {
             "precursor_mz": [["precursormz"], None, float],
             "adduct": [["precursortype", "precursor_type"], "", str],
-            "name": [[], None, None],
+            "name": [["title"], None, None],
             "id": [["spectrum_id", "db#", "spectrumid", "NISTNO"], None, None],
             "scan_number": [["_scan_number"], None, int],
             "rt": [["retention_time", "retentiontime"], None, float]
@@ -152,7 +152,8 @@ class SpectraCollector:
         if len(peaks) > 0 and \
                 len(spec_info["adduct"]) > 0 and \
                 spec_info["adduct"][-1] in {"+", "-"} and \
-                (not precursor_mz is None):
+                (precursor_mz is not None) and \
+                precursor_mz > 0:
             charge = spec_info["adduct"][-1]
             collections_spec = collections_spec[charge]
 

@@ -1,28 +1,6 @@
 import numpy as np
 
 
-def read_all_spectra(filename_input):
-    from mimas.ms.run import Run
-    import pymzml
-    run = Run()
-    mzml_data = pymzml.run.Reader(filename_input)
-    for n, spec_raw in enumerate(mzml_data):
-        spec = np.asarray(spec_raw.peaks('raw'), dtype=np.float32, order="C")
-        spec_info = {
-            "ms_level": spec_raw.ms_level,
-            '_scan_number': spec_raw.id_dict["scan"],
-            'peaks': spec,
-            'rt': spec_raw.scan_time_in_minutes() * 60,
-            'precursor_mz': spec_raw.selected_precursors[0].get('mz', None) \
-                if len(spec_raw.selected_precursors) > 0 else None,
-            'precursor_charge': spec_raw.selected_precursors[0].get('charge', None) \
-                if len(spec_raw.selected_precursors) > 0 else None,
-        }
-        run.add_scan(spec_info)
-
-    run.finish_adding_data()
-    return run
-
 
 def read_one_spectrum(filename_input):
     import pymzml
@@ -32,12 +10,12 @@ def read_one_spectrum(filename_input):
     :return: a dict contains a list with key 'spectra'.
         The list contains multiple dict, one dict represent a single spectrum's informaiton.
     """
-    run = pymzml.run.Reader(filename_input)
+    run = pymzml.run.Reader(filename_input, obo_version="4.1.33")
     for n, spec_raw in enumerate(run):
         spec = np.asarray(spec_raw.peaks('raw'), dtype=np.float32, order="C")
         spec_info = {
             "ms_level": spec_raw.ms_level,
-            '_scan_number': spec_raw.id_dict["scan"],
+            '_scan_number': n + 1,
             'peaks': spec,
             'rt': spec_raw.scan_time_in_minutes() * 60,
             'precursor_mz': spec_raw.selected_precursors[0].get('mz', None) \
@@ -45,4 +23,9 @@ def read_one_spectrum(filename_input):
             'precursor_charge': spec_raw.selected_precursors[0].get('charge', None) \
                 if len(spec_raw.selected_precursors) > 0 else None,
         }
+        if spec_info["precursor_charge"] is None:
+            if spec_raw["negative scan"]:
+                spec_info["precursor_charge"] = -1
+            elif spec_raw["positive scan"]:
+                spec_info["precursor_charge"] = 1
         yield spec_info
