@@ -47,6 +47,6 @@ Num Peaks: 3
 ## 3. Run the EntropySearch software
 
 * Download the EntropySearch software
-  from [https://github.com/YuanyueLi/SpectralEntropy/releases/](https://github.com/YuanyueLi/SpectralEntropy/releases/)
+  from [https://github.com/YuanyueLi/EntropySearch/releases/](https://github.com/YuanyueLi/EntropySearch/releases/)
 * Select the input file and output file, and the parameters you want to use.
 * Run the software.
