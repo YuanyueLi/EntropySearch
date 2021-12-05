@@ -102,7 +102,8 @@ def read(stream_input) -> dict:
 def read_one_spectrum(filename_input: str,
                       include_raw=0,
                       parse_mol=False,
-                      parse_comments=False) -> dict:
+                      parse_comments=False,
+                      **kwargs) -> dict:
     """
     Read one spectrum from .msp file.
     :param filename_input: a stream for input.
@@ -231,8 +232,15 @@ def _parse_mol(spectrum_info, mol_cache):
 
 
 def write_one_spectrum(fo, spectrum: dict):
+    """
+    Write one spectrum to .msp file. The name starts with _ will not be written.
+    """
     for name in spectrum:
-        if name == "spectrum" or name == "raw" or name == "num peaks":
+        if name == "peaks":
+            continue
+        if name.startswith("_"):
+            continue
+        if name.strip().lower() == "num peaks":
             continue
 
         item = spectrum[name]
@@ -244,8 +252,8 @@ def write_one_spectrum(fo, spectrum: dict):
 
         fo.write(str_out)
 
-    fo.write("Num peaks: {}\n".format(len(spectrum["spectrum"])))
-    for p in spectrum["spectrum"]:
+    fo.write("Num peaks: {}\n".format(len(spectrum["peaks"])))
+    for p in spectrum["peaks"]:
         fo.write(" ".join([str(x) for x in p]))
         fo.write("\n")
     fo.write("\n")

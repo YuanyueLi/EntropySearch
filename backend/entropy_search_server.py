@@ -2,6 +2,7 @@ import sys
 import multiprocessing
 from multiprocessing import Process
 from multiprocessing.queues import Queue
+import traceback
 
 from entropy_search_terminal import main as entropy_search_main
 
@@ -9,7 +10,11 @@ from entropy_search_terminal import main as entropy_search_main
 def run_function_with_output_to_queue(func, args, queue):
     stdout = sys.stdout
     sys.stdout = queue
-    func(*args)
+    try:
+        func(*args)
+    except Exception as e:
+        print(traceback.format_exc())
+        print(e)
     sys.stdout = stdout
 
 
@@ -48,6 +53,7 @@ class EntropySearchServer:
         try:
             while not self.output_queue.empty():
                 output_str = self.output_queue.get_nowait()
+                print(output_str)
                 if output_str is not None:
                     self.output_str.append(output_str)
         except AttributeError as e:
@@ -60,6 +66,7 @@ class EntropySearchServer:
         return self.get_output()
 
     def is_finished(self):
+        self.get_output()
         if self.thread is None:
             return True
         else:

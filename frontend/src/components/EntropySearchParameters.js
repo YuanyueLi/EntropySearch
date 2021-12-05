@@ -18,7 +18,7 @@ const EntropySearchParameters = () => {
         ms2_da: 0.05,
         noise: 0.01,
         precursor_removal: 1.6,
-        score_min: 0.75,
+        score_min: 0.5,
         threads: 1
     }
     const formStyle2 = {
@@ -65,7 +65,7 @@ const EntropySearchParameters = () => {
                           requiredMark={false}>
                         <Form.Item label={"Spectral file to search"} name="file_search"
                                    rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mzML"}
+                            <InputFile fileFormat={".msp,.mzML,.mzML.gz"}
                                        placeholder={"The file you want to analyze."}
                                        onChange={(e) => {
                                            let result = e
@@ -88,10 +88,6 @@ const EntropySearchParameters = () => {
                                    {...formStyle2}>
                             <InputNumber min={0} max={1} step={0.1}/>
                         </Form.Item>
-                        <Form.Item label={"Threads used for search"} name={"threads"}
-                                   {...formStyle2}>
-                            <IntegerInputNumber min={1}/>
-                        </Form.Item>
                         <Form.Item label={"Remove ions have m/z higher then precursor m/z minus this value"}
                                    name={"precursor_removal"}
                                    {...formStyle2}>
@@ -108,6 +104,10 @@ const EntropySearchParameters = () => {
                         <Form.Item label={"Noise removed before spectra search"} name={"noise"}
                                    {...formStyle2}>
                             <InputNumber min={0} max={1} step={0.1}/>
+                        </Form.Item>
+                        <Form.Item label={"Threads used for search"} name={"threads"}
+                                   {...formStyle2}>
+                            <IntegerInputNumber min={1} disabled/>
                         </Form.Item>
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
                             <Button type="primary" htmlType="submit" disabled={!stateEnableFinish}>

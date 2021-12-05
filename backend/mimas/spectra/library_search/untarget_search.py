@@ -38,6 +38,7 @@ def untarget_search(search_type, parameter):
             method: the name for similarity
     """
     # Read spectral library.
+    print("Reading spectral library...")
     spec_library = _read_spectral_library(parameter)
     if search_type == "identity":
         func_search = _identity_search_library
@@ -55,7 +56,7 @@ def untarget_search(search_type, parameter):
     spec_id = 0
     print("Start score: ", datetime.datetime.now())
 
-    # """
+    """
     parallel = multiplecore.MPRunner(func_run=func_search,
                                      func_merge=_merge_result,
                                      para_share=(spec_library, parameter["search"]),
@@ -82,14 +83,18 @@ def untarget_search(search_type, parameter):
                 if i != "peaks":
                     new_s["query_" + i] = spec_query[i]
             similarity_result.add_query_information(spec_query["scan_number"], new_s)
+            cur_result = func_search(spec_query, spec_library, parameter["search"])
+            if cur_result:
+                similarity_result.add_result_list(cur_result)
 
-            # result_all.append(func_search(spec_query, spec_library, para))
-            parallel.add_parameter_for_job((spec_query,), debug=0)
-
+            #result_all.append(func_search(spec_query, spec_library, para))
+            #parallel.add_parameter_for_job((spec_query,), debug=0)
+            if spec_id % 1000 == 0:
+                print("{} spectra have been processed.".format(spec_id))
             spec_id += 1
 
     print("Total find {} spectra.".format(spec_id))
-    result_all = parallel.get_result()
+    #result_all = parallel.get_result()
 
     # Output result
     similarity_result.finish_output()

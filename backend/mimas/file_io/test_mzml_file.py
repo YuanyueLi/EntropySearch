@@ -1,17 +1,14 @@
-import pymzml
+from mimas.file_io import spec_file
 
 
 def test_read(mzml_file):
-    run = pymzml.run.Reader(mzml_file)
-    for n, spec in enumerate(run):
-        print(
-            "Spectrum {0}, MS level {ms_level} @ RT {scan_time:1.2f}".format(
-                spec.ID, ms_level=spec.ms_level, scan_time=spec.scan_time_in_minutes()
-            )
-        )
-    print("Parsed {0} spectra from file {1}".format(n, mzml_file))
-    print()
+    for spec in spec_file.read_one_spectrum(mzml_file):
+        print(spec)
+        break
 
 
 if __name__ == '__main__':
-    test_read(r"D:\test\step_2\I5I5A9ER\I5I5A9ER.mzML.gz")
+    test_read(r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.mzML")
+    test_read(r"D:\test\spectra_example\MB_Qtof_C18_pos_2.mzML")
+    test_read(r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.mzML.gz")
+    test_read(r"D:\test\spectra_example\MB_Qtof_C18_pos_2.mzML.gz")
