@@ -55,23 +55,24 @@ def main(para):
 if __name__ == '__main__':
     args = Arguments()
     para_shared = {
-        "threads": 7,
+        "threads": 1,
         "precursor_removal": 1.6,
         "ms2_da": 0.05,
         "score_min": 0.5,
         "noise": 0.01,
         "clean_spectra": True,
+        "charge": -1,
 
-        'file_search': r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.mzML.gz",
-        "file_library": r"D:\test\spectra_example\database\MoNA-export-Experimental_Spectra.msp",
-        'file_output': r"D:\test\spectra_example\Neg_HILIC_45_Mix_9_4.csv",
+        'file_search': r"/share/fiehnlab/users/yli/project/Tethys/data/jake_2022_01_18/CSHneg/CSHneg_020621_1512.mzML.gz",
+        "file_library": r"/home/yli/project/Tethys/result/2022_01/0128_analyze_jake_data/10_run_on_hpc/identity_search/library/nist20-20211108.msp",
+        'file_output': r"/home/yli/project/Tethys/result/2022_01/0128_analyze_jake_data/10_run_on_hpc/test.csv",
     }
     para_untarget_hybrid = {
         "method": "untarget-hybrid",
     }
     para_untarget_identity = {
         "method": "untarget-identity",
-        "ms1_ppm": 10,
+        "ms1_ppm": 20,
     }
     para_target_shift = {
         "method": "target-shift",
