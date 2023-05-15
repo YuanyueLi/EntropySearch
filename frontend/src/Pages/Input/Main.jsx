@@ -2,24 +2,23 @@ import {useState, useEffect} from "react";
 import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {useRequest} from 'ahooks';
-import {useHistory} from "react-router-dom";
+// import {useHistory} from "react-router-dom";
 
 
-const serverAddress = "http://localhost:8765"
+const serverAddress = "http://localhost:8711"
 
 const EntropySearchParameters = () => {
-    const history = useHistory();
+    // const history = useHistory();
     const [form] = Form.useForm();
     const defaultValues = {
-        file_search: "",
-        file_library: "",
-        file_output: "",
-        ms1_ppm: 10,
-        ms2_da: 0.05,
-        noise: 0.01,
-        precursor_removal: 1.6,
+        file_query: "/p/FastEntropySearch/gui/test/input/query.msp",
+        file_library: "/p/FastEntropySearch/gui/test/input/mona.msp",
+        path_output: "/p/FastEntropySearch/gui/test/output/",
+        ms1_tolerance_in_da: 0.01,
+        ms2_tolerance_in_da: 0.02,
+        top_n: 100,
         score_min: 0.5,
-        threads: 1
+        cores: 1
     }
     const formStyle2 = {
         labelCol: {span: 16}, wrapperCol: {span: 2}
@@ -31,7 +30,7 @@ const EntropySearchParameters = () => {
 
     const postSearchParameter = useRequest((data) => {
         return {
-            url: serverAddress + "/entropy_search_parameter", method: 'post', body: JSON.stringify(data)
+            url: serverAddress + "/entropy_search", method: 'post', body: JSON.stringify(data)
         }
     }, {
         manual: true,
@@ -47,10 +46,9 @@ const EntropySearchParameters = () => {
     });
 
     const onFinish = (values) => {
-        //console.log('Success:', values);
+        console.log('Success:', values);
         setEnableFinish(false)
         postSearchParameter.run(values)
-        history.push("/result")
     };
 
     return <>
@@ -63,7 +61,7 @@ const EntropySearchParameters = () => {
                           onFinish={onFinish}
                           autoComplete="off"
                           requiredMark={false}>
-                        <Form.Item label={"Spectral file to search"} name="file_search"
+                        <Form.Item label={"Spectral file to search"} name="file_query"
                                    rules={[{required: true}]}>
                             <InputFile fileFormat={".msp,.mzML,.mzML.gz"}
                                        placeholder={"The file you want to analyze."}
@@ -77,37 +75,32 @@ const EntropySearchParameters = () => {
                         </Form.Item>
                         <Form.Item label={"Spectral library"} name="file_library"
                                    rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp"}
+                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2"}
                                        placeholder={"Public library can be downloaded from https://MassBank.us"}/>
                         </Form.Item>
                         <Form.Item label={"Result file"} name={"file_output"} required
                                    rules={[{required: true}]}>
                             <Input/>
                         </Form.Item>
-                        <Form.Item label={"Minimum similarity score needed for report"} name={"score_min"}
+                        {/*<Form.Item label={"Minimum similarity score needed for report"} name={"score_min"}*/}
+                        {/*           {...formStyle2}>*/}
+                        {/*    <InputNumber min={0} max={1} step={0.05}/>*/}
+                        {/*</Form.Item>*/}
+                        <Form.Item label={"Report top n hits"} name={"top_n"}
                                    {...formStyle2}>
-                            <InputNumber min={0} max={1} step={0.1}/>
+                            <InputNumber min={1} step={10}/>
                         </Form.Item>
-                        <Form.Item label={"Remove ions have m/z higher then precursor m/z minus this value"}
-                                   name={"precursor_removal"}
+                        <Form.Item label={"Precursor m/z tolerance (in Da)"} name={"ms1_tolerance_in_da"}
                                    {...formStyle2}>
-                            <InputNumber step={0.1}/>
+                            <InputNumber min={0.0001} step={0.01}/>
                         </Form.Item>
-                        <Form.Item label={"Precursor m/z tolerance (in ppm)"} name={"ms1_ppm"}
+                        <Form.Item label={"Product ions m/z tolerance (in Da)"} name={"ms2_tolerance_in_da"}
                                    {...formStyle2}>
-                            <InputNumber min={0} step={10}/>
+                            <InputNumber min={0.0001} step={0.01}/>
                         </Form.Item>
-                        <Form.Item label={"Product ions m/z tolerance (in Da)"} name={"ms2_da"}
+                        <Form.Item label={"Threads used for search"} name={"cores"}
                                    {...formStyle2}>
-                            <InputNumber min={0} step={0.1}/>
-                        </Form.Item>
-                        <Form.Item label={"Noise removed before spectra search"} name={"noise"}
-                                   {...formStyle2}>
-                            <InputNumber min={0} max={1} step={0.1}/>
-                        </Form.Item>
-                        <Form.Item label={"Threads used for search"} name={"threads"}
-                                   {...formStyle2}>
-                            <IntegerInputNumber min={1} disabled/>
+                            <IntegerInputNumber min={1} step={1}/>
                         </Form.Item>
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
                             <Button type="primary" htmlType="submit" disabled={!stateEnableFinish}>
