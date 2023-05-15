@@ -1,209 +1,70 @@
 import {useState, useEffect} from "react";
-import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal} from 'antd';
+import {Space, Row, Col, Spin, Modal, Card, Button} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {useRequest} from 'ahooks';
-// import {useHistory} from "react-router-dom";
+import {url} from "../Global/Config";
+import InputParameters from "./InputParameters";
+import {atomJobStatus} from "../Global/JobStatus";
+import {atom, useAtom} from "jotai";
+import {useNavigate, useParams} from "react-router-dom";
 
+export const atomShowModalInfo = atom(false);
+const ModalInfo = () => {
+    const [jobStatus, setJobStatus] = useAtom(atomJobStatus);
+    const [showModalInfo, setShowModalInfo] = useAtom(atomShowModalInfo);
 
-const serverAddress = "http://localhost:8711"
+    const navigate = useNavigate();
 
-const EntropySearchParameters = () => {
-    // const history = useHistory();
-    const [form] = Form.useForm();
-    const defaultValues = {
-        file_query: "/p/FastEntropySearch/gui/test/input/query.msp",
-        file_library: "/p/FastEntropySearch/gui/test/input/mona.msp",
-        path_output: "/p/FastEntropySearch/gui/test/output/",
-        ms1_tolerance_in_da: 0.01,
-        ms2_tolerance_in_da: 0.02,
-        top_n: 100,
-        score_min: 0.5,
-        cores: 1
-    }
-    const formStyle2 = {
-        labelCol: {span: 16}, wrapperCol: {span: 2}
-    }
-    const validateMessages = {
-        required: "Please input '${label}'",
-    };
-    const [stateEnableFinish, setEnableFinish] = useState(true)
-
-    const postSearchParameter = useRequest((data) => {
-        return {
-            url: serverAddress + "/entropy_search", method: 'post', body: JSON.stringify(data)
-        }
-    }, {
-        manual: true,
-        onSuccess: (result, params) => {
-            console.log(result)
-        },
-        onError: () => {
-            Modal.error({
-                title: "Error!",
-                centered: true
-            })
-        }
-    });
-
-    const onFinish = (values) => {
-        console.log('Success:', values);
-        setEnableFinish(false)
-        postSearchParameter.run(values)
-    };
-
-    return <>
+    return <Modal title={""} open={showModalInfo} footer={null}
+                  onOk={() => setShowModalInfo(false)} onCancel={() => setShowModalInfo(false)}>
         <Row align={"middle"} justify={"center"}>
-            <Col span={22}>
-                <ConfigProvider form={{validateMessages}}>
-                    <Form name="basic" form={form}
-                          labelCol={{span: 5}} wrapperCol={{span: 18}}
-                          initialValues={defaultValues}
-                          onFinish={onFinish}
-                          autoComplete="off"
-                          requiredMark={false}>
-                        <Form.Item label={"Spectral file to search"} name="file_query"
-                                   rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mzML,.mzML.gz"}
-                                       placeholder={"The file you want to analyze."}
-                                       onChange={(e) => {
-                                           let result = e
-                                           if (e.lastIndexOf('.')) {
-                                               result = e.substr(0, e.lastIndexOf('.'))
-                                           }
-                                           form.setFieldsValue({file_output: result + ".result.csv"})
-                                       }}/>
-                        </Form.Item>
-                        <Form.Item label={"Spectral library"} name="file_library"
-                                   rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2"}
-                                       placeholder={"Public library can be downloaded from https://MassBank.us"}/>
-                        </Form.Item>
-                        <Form.Item label={"Result file"} name={"file_output"} required
-                                   rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        {/*<Form.Item label={"Minimum similarity score needed for report"} name={"score_min"}*/}
-                        {/*           {...formStyle2}>*/}
-                        {/*    <InputNumber min={0} max={1} step={0.05}/>*/}
-                        {/*</Form.Item>*/}
-                        <Form.Item label={"Report top n hits"} name={"top_n"}
-                                   {...formStyle2}>
-                            <InputNumber min={1} step={10}/>
-                        </Form.Item>
-                        <Form.Item label={"Precursor m/z tolerance (in Da)"} name={"ms1_tolerance_in_da"}
-                                   {...formStyle2}>
-                            <InputNumber min={0.0001} step={0.01}/>
-                        </Form.Item>
-                        <Form.Item label={"Product ions m/z tolerance (in Da)"} name={"ms2_tolerance_in_da"}
-                                   {...formStyle2}>
-                            <InputNumber min={0.0001} step={0.01}/>
-                        </Form.Item>
-                        <Form.Item label={"Threads used for search"} name={"cores"}
-                                   {...formStyle2}>
-                            <IntegerInputNumber min={1} step={1}/>
-                        </Form.Item>
-                        <Form.Item wrapperCol={{offset: 10, span: 4}}>
-                            <Button type="primary" htmlType="submit" disabled={!stateEnableFinish}>
-                                Start
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </ConfigProvider>
+            <Col span={24}>
+                {jobStatus.status ? <>
+                    <Space>
+                        <Spin/> <>{jobStatus.status}</>
+                    </Space>
+                </> : <>
+                    <>There is no job running.</>
+                </>}
             </Col>
         </Row>
-    </>
+        <br/>
+        <Row align={"middle"} justify={"center"}>
+            <Col span={24}>
+                <>{jobStatus.is_finished ? <>
+                    <p>Spectral search has been finished. You can view the results now. </p>
+                </> : <>{jobStatus.is_ready ? <>
+                    <p>Spectral search hasn't been finished yet, but you can still view part of the results now.</p>
+                </> : <></>}</>}
+                </>
+            </Col>
+        </Row>
+        <Row align={"middle"} justify={"center"}>
+            {jobStatus.is_ready || jobStatus.is_finished ? <>
+                <Button type="primary" onClick={() => {
+                    navigate("/result")
+                }}>  View results</Button>
+            </> : <></>}
+        </Row>
+    </Modal>
 }
 
-const FileSelector = (props) => {
-    const uploadProps = {
-        multiple: false,
-        maxCount: 1,
-        showUploadList: false,
-        accept: props.fileFormat,
-        beforeUpload: (file) => {
-            if (file) {
-                if (file.path) {
-                    props.setFile(file.path)
-                } else {
-                    props.setFile(file.name)
-                }
-            }
-            return false
-        },
-    }
+const Main = () => {
+    return <div>
+        <ModalInfo/>
+        <Row align={"middle"} justify={"center"}>
+            <Col span={24}>
+                <br/>
+                <Card style={{width: 800, height: 600, margin: "auto"}}>
+                    <Row align={"middle"} justify={"center"} style={{height: "100%"}}>
+                        <Col span={24}>
+                            <InputParameters/>
+                        </Col>
+                    </Row>
+                </Card>
+            </Col>
+        </Row>
+    </div>
+};
 
-    return <>
-        <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined/>}>Select file</Button>
-        </Upload>
-    </>
-}
-
-const InputFile = ({value = undefined, onChange, fileFormat, placeholder}) => {
-    const [stateFilePath, setFilePath] = useState(value)
-
-    useEffect(() => {
-        //console.log(stateFilePath)
-        if (stateFilePath) {
-            onChange?.(stateFilePath)
-        }
-    }, [stateFilePath, onChange])
-
-    return <Row justify={"space-between"}>
-        <Col span={19}>
-            <Input onChange={(e) => setFilePath(e.target.value)} value={stateFilePath} placeholder={placeholder}/>
-        </Col>
-        <Col span={4}>
-            <FileSelector setFile={setFilePath} fileFormat={fileFormat}/>
-        </Col>
-    </Row>
-}
-
-const IntegerInputNumber = (props) => {
-    const {defaultValue, min, placeholder} = props;
-    const [preValue, setPreValue] = useState(defaultValue ?? min ?? 0);
-
-    const handleChange = (value) => {
-        setPreValue(value);
-    };
-
-    const formatter = (value) => value;
-
-    const parse = (value) => {
-        if (value === "") {
-            return value;
-        }
-
-        if (
-            Number.isNaN(Number.parseInt(value, 10)) ||
-            Number(value) === 0 ||
-            Number(value) < min
-        ) {
-            return preValue;
-        }
-
-        return Math.abs(Number.parseInt(value, 10));
-    };
-
-    const handleBlur = ({target: {value}}) => {
-        if (value === "") {
-            setPreValue(defaultValue);
-        }
-    };
-
-    return <InputNumber
-        min={min}
-        step={1}
-        value={preValue}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        formatter={formatter}
-        parser={parse}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        {...props}
-    />
-}
-
-
-export default EntropySearchParameters;
+export default Main;
