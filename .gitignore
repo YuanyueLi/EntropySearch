@@ -5,6 +5,8 @@ __pycache__/
 frontend/node_modules/
 .idea/
 .vscode/
+test/
+py_env/
 
 # C extensions
 *.so
@@ -144,3 +146,7 @@ test/input/test.msp
 test/input/test.msp.eyJtcz.esi
 test/input/test.mzML
 test/input/test.mzML.eyJtcz.esi
+test/debug/50-1.mzML
+test/debug/MSMS-Public-Neg-VS15.msp
+test/debug/MSMS-Public-Neg-VS15.msp.eyJtcz.esi
+frontend/yarn.lock
