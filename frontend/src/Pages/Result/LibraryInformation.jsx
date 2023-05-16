@@ -41,11 +41,8 @@ const Main = () => {
             const data = {...getAtomGlobalLibraryData};
             delete data['peaks'];
             delete data['num peaks'];
-            if (data.smiles) {
-                setStateSmiles(data.smiles);
-            } else {
-                setStateSmiles("");
-            }
+            const smiles = data.smiles || data["library-smiles"] || "";
+            setStateSmiles(smiles);
             let display = Object.entries(data).map(([key, value]) => {
                 if (key.startsWith("library-")) {
                     key = key.replace("library-", "")

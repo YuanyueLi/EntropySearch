@@ -10,8 +10,10 @@ const InputParameters = (showNext) => {
     const [, setShowModalInfo] = useAtom(atomShowModalInfo);
     const [form] = Form.useForm();
     const defaultValues = {
-        file_query: "/p/FastEntropySearch/gui/test/input/query.msp",
-        file_library: "/p/FastEntropySearch/gui/test/input/query.msp",
+        // file_query: "/p/FastEntropySearch/gui/test/input/query.msp",
+        // file_library: "/p/FastEntropySearch/gui/test/input/query.msp",
+        file_query: "",
+        file_library: "",
         path_output: "/p/FastEntropySearch/gui/test/output/",
         ms1_tolerance_in_da: 0.01,
         ms2_tolerance_in_da: 0.02,
