@@ -1,4 +1,4 @@
-import {Col, Row, Tabs, Space, Table, Tag} from 'antd';
+import {Col, Row, Tabs, Space, Table, Tag, Spin} from 'antd';
 import React, {useEffect, useState, useContext, useMemo} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {SmileOutlined, FrownOutlined, CheckOutlined} from "@ant-design/icons";
@@ -18,22 +18,22 @@ const columnsTemplate = [
         title: "Scan",
         dataIndex: "scan",
         render: (_, record) => record.scan || "NA",
-        width: 60,
+        width: 30,
     }, {
         title: "Name",
         dataIndex: "name",
         render: (_, record) => record.name || "",
         sorter: (a, b) => (a.name || "").localeCompare(b.name || ""),
-        width: 50,
+        width: 80,
     }, {
         title: "RT",
         dataIndex: "rt",
-        render: (_, record) => record.rt.toFixed(1),
+        render: (_, record) => (record.rt === undefined ? -1 : record.rt).toFixed(1),
         width: 50,
     }, {
         title: "Precursor m/z",
         dataIndex: "precursor_mz",
-        render: (_, record) => record.precursor_mz.toFixed(3),
+        render: (_, record) => (record.precursor_mz === undefined ? -1 : record.precursor_mz).toFixed(3),
         width: 60,
     }, {
         title: "Identity Score",
@@ -56,7 +56,7 @@ const columnsTemplate = [
 const columns = columnsTemplate.map(k => ({
     key: k.dataIndex,
     ellipsis: true,
-    render: (_, record) => record[k.dataIndex].toFixed(3),
+    render: (_, record) => record[k.dataIndex] === undefined ? <Spin/> : record[k.dataIndex].toFixed(3),
     sorter: (a, b) => (a[k.dataIndex] ?? -1) - (b[k.dataIndex] ?? -1),
     ...k
 }));
@@ -64,7 +64,7 @@ const columns = columnsTemplate.map(k => ({
 export default () => {
     const navigate = useNavigate();
 
-    const [stateColumns, setStateColumns] = useState([]);
+    const [stateColumns, setStateColumns] = useState(null);
     const [stateData, setStateData] = useState([]);
     const [stateHighlightRow, setStateHighlightRow] = useState(0);
 
@@ -77,7 +77,7 @@ export default () => {
         if (atomGlobalRun.spectra) {
             const tableData = atomGlobalRun.spectra
             if (tableData) {
-                setStateData(tableData.map(d => ({...d, key: d.scan})));
+                setStateData(tableData.map(d => ({...d, key: d._scan_number})));
             }
         }
     }, [atomGlobalRun.spectra]);
@@ -90,13 +90,12 @@ export default () => {
             height={500} vid={'spectra-list-table'}
             columns={columns} dataSource={stateData}
             rowClassName={record => {
-                // return (atomWikiId.id2 || "").toString() === (record.wiki_id || "").toString() ? 'row-active' : '';
-                return ''
+                return (atomGlobalSelectedScan || "").toString() === (record.key || "").toString() ? 'row-active' : '';
             }}
             onRow={record => ({
                 onClick: event => {
                     console.log("record", record);
-                    setAtomGlobalSelectedScan(record.scan);
+                    setAtomGlobalSelectedScan(record.key);
                 },
             })}
         />

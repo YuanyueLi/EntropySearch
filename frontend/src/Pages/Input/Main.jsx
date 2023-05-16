@@ -15,16 +15,17 @@ const ModalInfo = () => {
 
     const navigate = useNavigate();
 
-    return <Modal title={""} open={showModalInfo} footer={null}
+    return <Modal title={<><br/></>} open={showModalInfo} footer={null}
+                  closable={false} keyboard={false} maskClosable={false}
                   onOk={() => setShowModalInfo(false)} onCancel={() => setShowModalInfo(false)}>
         <Row align={"middle"} justify={"center"}>
             <Col span={24}>
                 {jobStatus.status ? <>
-                    <Space>
+                    <Space align={"baseline"}>
                         <Spin/> <>{jobStatus.status}</>
                     </Space>
                 </> : <>
-                    <>There is no job running.</>
+                    <></>
                 </>}
             </Col>
         </Row>
@@ -42,6 +43,7 @@ const ModalInfo = () => {
         <Row align={"middle"} justify={"center"}>
             {jobStatus.is_ready || jobStatus.is_finished ? <>
                 <Button type="primary" onClick={() => {
+                    setShowModalInfo(false)
                     navigate("/result")
                 }}>  View results</Button>
             </> : <></>}
@@ -55,7 +57,7 @@ const Main = () => {
         <Row align={"middle"} justify={"center"}>
             <Col span={24}>
                 <br/>
-                <Card style={{width: 800, height: 600, margin: "auto"}}>
+                <Card style={{width: 800, height: 500, margin: "auto"}}>
                     <Row align={"middle"} justify={"center"} style={{height: "100%"}}>
                         <Col span={24}>
                             <InputParameters/>

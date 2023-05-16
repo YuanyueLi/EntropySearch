@@ -5,3 +5,7 @@ body {
 .ant-card-body {
     height: 100%;
 }
+
+.row-active {
+    background-color: #f0f0f0;
+}

@@ -46,6 +46,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["react-plotly.js", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:2.6.0"],\
             ["react-router-dom", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:6.11.1"],\
             ["react-scripts", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:5.0.1"],\
+            ["smiles-drawer", "npm:2.1.7"],\
             ["virtuallist-antd", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:0.7.6"],\
             ["web-vitals", "npm:2.1.4"]\
           ],\
@@ -7555,6 +7556,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["chroma-js", [\
+        ["npm:2.4.2", {\
+          "packageLocation": "./.yarn/cache/chroma-js-npm-2.4.2-76dd14218f-cf9884c02d.zip/node_modules/chroma-js/",\
+          "packageDependencies": [\
+            ["chroma-js", "npm:2.4.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["chrome-trace-event", [\
         ["npm:1.0.3", {\
           "packageLocation": "./.yarn/cache/chrome-trace-event-npm-1.0.3-e0ae3dcd60-cb8b1fc7e8.zip/node_modules/chrome-trace-event/",\
@@ -9587,6 +9597,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["react-plotly.js", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:2.6.0"],\
             ["react-router-dom", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:6.11.1"],\
             ["react-scripts", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:5.0.1"],\
+            ["smiles-drawer", "npm:2.1.7"],\
             ["virtuallist-antd", "virtual:2cc69ace9701e76e8dafe50ec5726de9888f07dc94832b977f6bd2a239264a5f5d358d1f1a196ed33962e6f763726ff02d93ca99a51b8a168a5f97ba2d8c05e9#npm:0.7.6"],\
             ["web-vitals", "npm:2.1.4"]\
           ],\
@@ -19936,6 +19947,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/smart-buffer-npm-4.2.0-5ac3f668bb-b5167a7142.zip/node_modules/smart-buffer/",\
           "packageDependencies": [\
             ["smart-buffer", "npm:4.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["smiles-drawer", [\
+        ["npm:2.1.7", {\
+          "packageLocation": "./.yarn/cache/smiles-drawer-npm-2.1.7-be14036fdb-7dd5ad49e2.zip/node_modules/smiles-drawer/",\
+          "packageDependencies": [\
+            ["smiles-drawer", "npm:2.1.7"],\
+            ["chroma-js", "npm:2.4.2"]\
           ],\
           "linkType": "HARD"\
         }]\

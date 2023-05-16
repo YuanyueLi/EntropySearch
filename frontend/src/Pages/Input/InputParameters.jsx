@@ -11,7 +11,7 @@ const InputParameters = (showNext) => {
     const [form] = Form.useForm();
     const defaultValues = {
         file_query: "/p/FastEntropySearch/gui/test/input/query.msp",
-        file_library: "/p/FastEntropySearch/gui/test/input/mona.msp",
+        file_library: "/p/FastEntropySearch/gui/test/input/query.msp",
         path_output: "/p/FastEntropySearch/gui/test/output/",
         ms1_tolerance_in_da: 0.01,
         ms2_tolerance_in_da: 0.02,
@@ -20,12 +20,20 @@ const InputParameters = (showNext) => {
         cores: 1
     }
     const formStyle2 = {
-        labelCol: {span: 16}, wrapperCol: {span: 2}
+        labelCol: {span: 16}, wrapperCol: {span: 8}
     }
     const validateMessages = {
         required: "Please input '${label}'",
     };
     const [stateEnableFinish, setEnableFinish] = useState(true)
+
+    // Update CPU cores
+    const getCpuCores = useRequest(url.getCpuCores, {
+        onSuccess: (result, params) => {
+            const data = result.data
+            form.setFieldsValue({cores: data.cpu})
+        }
+    })
 
     const postSearchParameter = useRequest(url.startEntropySearch, {
         manual: true,
@@ -74,16 +82,12 @@ const InputParameters = (showNext) => {
                         </Form.Item>
                         <Form.Item label={"Spectral library"} name="file_library"
                                    rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2"}
+                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2,.esi"}
                                        placeholder={"Public library can be downloaded from https://MassBank.us"}/>
                         </Form.Item>
-                        <Form.Item label={"Result file"} name={"file_output"} required
-                                   rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        {/*<Form.Item label={"Minimum similarity score needed for report"} name={"score_min"}*/}
-                        {/*           {...formStyle2}>*/}
-                        {/*    <InputNumber min={0} max={1} step={0.05}/>*/}
+                        {/*<Form.Item label={"Result file"} name={"file_output"} required*/}
+                        {/*           rules={[{required: true}]}>*/}
+                        {/*    <Input/>*/}
                         {/*</Form.Item>*/}
                         <Form.Item label={"Report top n hits"} name={"top_n"}
                                    {...formStyle2}>
@@ -102,7 +106,7 @@ const InputParameters = (showNext) => {
                             <IntegerInputNumber min={1} step={1}/>
                         </Form.Item>
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
-                            <Button type="primary" htmlType="submit" disabled={!stateEnableFinish}>
+                            <Button type="primary" htmlType="submit">
                                 Start
                             </Button>
                         </Form.Item>
