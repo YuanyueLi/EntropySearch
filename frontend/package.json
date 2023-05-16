@@ -2,6 +2,18 @@
   "name": "entropy_search",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
+  "main": "public/electron.js",
+  "build": {
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "portable"
+        }
+      ]
+    }
+  },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@craco/craco": "^7.1.0",
@@ -23,6 +35,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
+    "ele": "electron .",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
@@ -42,6 +55,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "electron": "^24.3.0",
     "eslint-config-react": "^1.1.7",
     "eslint-config-react-app": "^7.0.1"
   }

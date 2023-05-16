@@ -18,7 +18,7 @@ const JobStatus = () => {
         onSuccess: (result, params) => {
             const data = result.data;
             setJobStatus(data)
-            if (!(data.is_ready && data.is_finished)) {
+            if ((data.is_ready && (!data.is_finished)) || (!data.is_ready && data.is_finished)) {
                 // message.info(data.status, 1)
                 messageApi.open({
                     key: "jobStatus",

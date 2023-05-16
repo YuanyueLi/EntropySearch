@@ -2,6 +2,7 @@ import React, {Suspense, useEffect} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {Col, Row, Skeleton, Steps} from "antd";
 import {atom, useAtom} from 'jotai'
+import JobStatus from "./JobStatus";
 
 
 const TemplateWebsite = (props) => {
@@ -9,6 +10,7 @@ const TemplateWebsite = (props) => {
     const location = useLocation();
 
     return (<>
+        <JobStatus/>
         <Row justify="space-between" align={"middle"} style={{background: "#f5f5f5"}}>
             <Col span={8} style={{paddingLeft: "24px", paddingRight: "24px"}}>
                 <h1 onClick={() => navigate('/')}
