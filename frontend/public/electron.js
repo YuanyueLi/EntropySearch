@@ -46,7 +46,7 @@ function createWindow() {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
     const {exec} = require("child_process");
-    exec("taskkill /f /t /im entropy_search_backend.exe", (err, stdout, stderr) => {
+    exec("taskkill /f /t /im main.exe", (err, stdout, stderr) => {
         if (err) {
             console.log(err)
             return;
@@ -74,23 +74,23 @@ app.on('activate', () => {
 
 
 app.whenReady().then(() => {
-    // const backend = path.join(process.cwd(), 'entropy_search_backend.exe')
-    // var execfile = require("child_process").execFile;
-    // execfile(
-    //     backend,
-    //     {
-    //         windowsHide: true,
-    //     },
-    //     (err, stdout, stderr) => {
-    //         if (err) {
-    //             console.log(err);
-    //         }
-    //         if (stdout) {
-    //             console.log(stdout);
-    //         }
-    //         if (stderr) {
-    //             console.log(stderr);
-    //         }
-    //     }
-    // )
+    const backend = path.join(process.cwd(), 'main.exe')
+    var execfile = require("child_process").execFile;
+    execfile(
+        backend,
+        {
+            windowsHide: true,
+        },
+        (err, stdout, stderr) => {
+            if (err) {
+                console.log(err);
+            }
+            if (stdout) {
+                console.log(stdout);
+            }
+            if (stderr) {
+                console.log(stderr);
+            }
+        }
+    )
 }).then(createWindow)

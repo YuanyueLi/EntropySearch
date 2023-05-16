@@ -119,6 +119,7 @@ class EntropySearch:
                 if queue_input_num % 1000 == 0:
                     self.status = f"Reading {file_query.name}... {queue_input_num} spectra read"
 
+            self.ready = True
             for _ in range(cores):
                 queue_input.put(None)
 
@@ -174,7 +175,6 @@ class EntropySearch:
         for entropy_search in self.spectral_library.values():
             entropy_search.save_memory_for_multiprocessing()
 
-        self.ready = True
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library

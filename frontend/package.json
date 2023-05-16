@@ -12,7 +12,16 @@
           "target": "portable"
         }
       ]
-    }
+    },
+    "extraFiles": [
+      {
+        "from": "../backend/dist/",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
@@ -21,7 +30,7 @@
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
     "ahooks": "^3.7.7",
-    "antd": "^5.4.7",
+    "antd": "5.4.7",
     "axios": "^1.4.0",
     "jotai": "^2.1.0",
     "plotly.js": "^2.23.0",
@@ -35,6 +44,8 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
+    "pack": "electron-builder --dir",
+    "dist": "craco build && electron-builder",
     "ele": "electron .",
     "start": "craco start",
     "build": "craco build",
