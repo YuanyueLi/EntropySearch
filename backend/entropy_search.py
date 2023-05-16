@@ -56,8 +56,12 @@ class EntropySearch:
 
             for search_type, score_array in entropy_search_result.items():
                 # Select top N results
-                top_n_idx = np.argpartition(score_array, -top_n)[-top_n:]
-                top_n_score = score_array[top_n_idx]
+                if top_n < len(score_array):
+                    top_n_idx = np.argpartition(score_array, -top_n)[-top_n:]
+                    top_n_score = score_array[top_n_idx]
+                else:
+                    top_n_idx = np.arange(len(score_array))
+                    top_n_score = score_array
 
                 # Filter by score > 0
                 selected_idx = top_n_score > 0
@@ -175,7 +179,6 @@ class EntropySearch:
         for entropy_search in self.spectral_library.values():
             entropy_search.save_memory_for_multiprocessing()
 
-
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
         index_hash = base64.b64encode(json.dumps({
@@ -261,7 +264,7 @@ def _parse_spectrum(spec):
         "scan": [["_scan_number"], -1, int],
         "name": [["title"], "", str],
         "rt": [["retentiontime"], -1, float],
-        "precursor_mz": [["precursormz"], -1, convert_precursor_mz],
+        "precursor_mz": [["precursormz", "pepmass"], -1, convert_precursor_mz],
         "ion_mode": [["ionmode"], "", str],
         "precursor_type": [["precursortype"], "", str],
         "charge": [[], "", str],
@@ -301,16 +304,17 @@ if __name__ == '__main__':
         "ms1_tolerance_in_da": 0.01,
         "ms2_tolerance_in_da": 0.02,
         "top_n": 10,
-        "cores": 20,
+        "cores": 1,
 
-        "file_query": r"/p/FastEntropySearch/gui/test/input/query.msp",
-        "file_library": r"/p/FastEntropySearch/gui/test/input/query.msp",
+        "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
+        "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         "file_output": r"/p/FastEntropySearch/gui/test/output/result.csv",
     }
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
     all_results = entropy_search.search_file(Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], para["cores"])
-    test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
-    print(test)
-    test2 = entropy_search.get_one_library_spectrum(charge=1, library_idx=1489)
-    print(test2)
+    a = 1
+    # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
+    # print(test)
+    # test2 = entropy_search.get_one_library_spectrum(charge=1, library_idx=1489)
+    # print(test2)
