@@ -157,7 +157,6 @@ class EntropySearch:
             self.error = True
             return []
 
-
     def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
         # Search spectra
         all_results = []
@@ -195,6 +194,16 @@ class EntropySearch:
             "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
         }).encode()).decode()[:6]
 
+        # Check if the library is already indexed
+        if file_library.suffix == ".esi":
+            try:
+                with open(file_library, "rb") as f:
+                    self.spectral_library = pickle.load(f)
+                return True
+            except:
+                pass
+        
+        # Check if the library is existed
         file_library_index = file_library.parent / (file_library.name + "." + index_hash + ".esi")
         library_name = ".".join(file_library_index.stem.split(".")[:-2])
         if file_library_index.exists():

@@ -72,8 +72,8 @@ const InputParameters = (showNext) => {
                           requiredMark={false}>
                         <Form.Item label={"Spectral file to search"} name="file_query"
                                    rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mzML,.mzML.gz"}
-                                       placeholder={"The file you want to analyze."}
+                            <InputFile fileFormat={".msp,.mzML,.mgf"}
+                                       placeholder={"The mzML, mgf, msp format is supported."}
                                        onChange={(e) => {
                                            let result = e
                                            if (e.lastIndexOf('.')) {
@@ -85,7 +85,7 @@ const InputParameters = (showNext) => {
                         <Form.Item label={"Spectral library"} name="file_library"
                                    rules={[{required: true}]}>
                             <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2,.esi"}
-                                       placeholder={"Public library can be downloaded from https://MassBank.us"}/>
+                                       placeholder={"The msp, lbm2, esi, mgf, mzML is supported."}/>
                         </Form.Item>
                         {/*<Form.Item label={"Result file"} name={"file_output"} required*/}
                         {/*           rules={[{required: true}]}>*/}

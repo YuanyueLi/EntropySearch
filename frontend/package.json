@@ -9,13 +9,34 @@
   "homepage": ".",
   "main": "public/electron.js",
   "build": {
+    "productName": "Entropy Search",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
     "win": {
-      "icon": "build/icon.png",
       "target": [
         {
           "target": "portable"
         }
-      ]
+      ],
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage"
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg"
+        }
+      ],
+      "icon": "build/icon.png"
     },
     "extraFiles": [
       {
