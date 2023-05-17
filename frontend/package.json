@@ -49,7 +49,7 @@
   },
   "scripts": {
     "pack": "electron-builder --dir",
-    "dist": "craco build && electron-builder",
+    "dist": "craco build && electron-builder --dir",
     "ele": "electron .",
     "start": "craco start",
     "build": "craco build",

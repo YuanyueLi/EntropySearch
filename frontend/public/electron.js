@@ -1,4 +1,4 @@
-const {app, BrowserWindow, globalShortcut} = require('electron')
+const { app, BrowserWindow, globalShortcut } = require('electron')
 const url = require('url');
 const path = require('path');
 
@@ -45,15 +45,27 @@ function createWindow() {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-    const {exec} = require("child_process");
-    exec("taskkill /f /t /im main.exe", (err, stdout, stderr) => {
-        if (err) {
-            console.log(err)
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.log(`stderr: ${stderr}`);
-    });
+    const { exec } = require("child_process");
+    // Kill the backend process based on the OS
+    if (process.platform == 'win32') {
+        exec("taskkill /f /t /im entropy_search_backend.exe", (err, stdout, stderr) => {
+            if (err) {
+                console.log(err)
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+        });
+    } else {
+        exec("killall entropy_search_backend.exe", (err, stdout, stderr) => {
+            if (err) {
+                console.log(err)
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+        });
+    }
 
     if (process.platform !== 'darwin') {
         app.quit()
@@ -74,13 +86,11 @@ app.on('activate', () => {
 
 
 app.whenReady().then(() => {
-    const backend = path.join(process.cwd(), 'main.exe')
+    // Select based on the OS
+    const backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+    console.log("Backend: " + backend)
     var execfile = require("child_process").execFile;
-    execfile(
-        backend,
-        {
-            windowsHide: false,
-        },
+    execfile(backend, { windowsHide: false, },
         (err, stdout, stderr) => {
             if (err) {
                 console.log(err);
