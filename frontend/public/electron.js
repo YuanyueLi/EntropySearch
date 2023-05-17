@@ -79,7 +79,7 @@ app.whenReady().then(() => {
     execfile(
         backend,
         {
-            windowsHide: true,
+            windowsHide: false,
         },
         (err, stdout, stderr) => {
             if (err) {

@@ -145,15 +145,18 @@ class EntropySearch:
 
                 for p in all_processes:
                     p.join()
+            self.finished = True
+            self.status = ""
+            return all_results
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             self.status = f"Error: {e}"
             self.ready = False
             self.finished = False
             self.error = True
+            return []
 
-        self.finished = True
-        self.status = ""
-        return all_results
 
     def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
         # Search spectra

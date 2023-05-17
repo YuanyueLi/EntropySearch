@@ -7,7 +7,7 @@ fastapi==0.95.1
 h11==0.14.0
 idna==3.4
 lz4==4.3.2
-ms-entropy==0.5.4
+ms-entropy==0.5.7
 msgpack==1.0.5
 numpy==1.24.3
 pefile==2023.2.7
@@ -21,3 +21,4 @@ sniffio==1.3.0
 starlette==0.26.1
 typing_extensions==4.5.0
 uvicorn==0.22.0
+lxml==4.9.2
