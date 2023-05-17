@@ -29,13 +29,13 @@ const InputParameters = (showNext) => {
     };
     const [stateEnableFinish, setEnableFinish] = useState(true)
 
-    // Update CPU cores
-    const getCpuCores = useRequest(url.getCpuCores, {
-        onSuccess: (result, params) => {
-            const data = result.data
-            form.setFieldsValue({cores: data.cpu})
-        }
-    })
+    // // Update CPU cores
+    // const getCpuCores = useRequest(url.getCpuCores, {
+    //     onSuccess: (result, params) => {
+    //         const data = result.data
+    //         form.setFieldsValue({cores: data.cpu})
+    //     }
+    // })
 
     const postSearchParameter = useRequest(url.startEntropySearch, {
         manual: true,
