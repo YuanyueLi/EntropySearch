@@ -1,6 +1,7 @@
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const {app, BrowserWindow, globalShortcut} = require('electron')
 const url = require('url');
 const path = require('path');
+const gotTheLock = app.requestSingleInstanceLock()
 
 
 function createWindow() {
@@ -37,6 +38,23 @@ function createWindow() {
 
 }
 
+let myWindow = null
+if (!gotTheLock) {
+    app.quit()
+} else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (myWindow) {
+            if (myWindow.isMinimized()) myWindow.restore()
+            myWindow.focus()
+        }
+    })
+
+    // Create myWindow, load the rest of the app, etc...
+    app.on('ready', () => {
+    })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -45,7 +63,7 @@ function createWindow() {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-    const { exec } = require("child_process");
+    const {exec} = require("child_process");
     // Kill the backend process based on the OS
     if (process.platform == 'win32') {
         exec("taskkill /f /t /im entropy_search_backend.exe", (err, stdout, stderr) => {
@@ -87,10 +105,17 @@ app.on('activate', () => {
 
 app.whenReady().then(() => {
     // Select based on the OS
-    const backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+    let backend = ""
+    if (process.platform == 'win32') {
+        backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+    } else if (process.platform == 'darwin') {
+        backend = path.join(process.cwd(), "..", 'entropy_search_backend.exe')
+    } else {
+        backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+    }
     console.log("Backend: " + backend)
     var execfile = require("child_process").execFile;
-    execfile(backend, { windowsHide: false, },
+    execfile(backend, {windowsHide: false,},
         (err, stdout, stderr) => {
             if (err) {
                 console.log(err);
@@ -103,4 +128,7 @@ app.whenReady().then(() => {
             }
         }
     )
-}).then(createWindow)
+}).then(() => {
+    myWindow = createWindow();
+    return myWindow
+})
