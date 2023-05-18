@@ -154,7 +154,8 @@ async def read_root():
 
 
 if __name__ == "__main__":    
-    if sys.platform.startswith('win'):
+    # Modify in case of Windows and MacOS
+    if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
