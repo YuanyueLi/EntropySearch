@@ -1,20 +1,42 @@
 {
   "name": "entropy_search",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "GUI for Entropy Search",
-  "main": "public/electron.js",
-  "private": false,
+  "author": {
+    "name": "Yuanyue Li"
+  },
+  "private": true,
   "homepage": ".",
-  "author": "Yuanyue Li",
-  "license": "MIT",
+  "main": "public/electron.js",
   "build": {
+    "productName": "Entropy Search",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
     "win": {
-      "icon": "build/icon.png",
       "target": [
         {
           "target": "portable"
         }
-      ]
+      ],
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage"
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg"
+        }
+      ],
+      "icon": "build/icon.png"
     },
     "extraFiles": [
       {
@@ -26,20 +48,36 @@
       }
     ]
   },
+  "dependencies": {
+    "@ant-design/icons": "^5.0.1",
+    "@craco/craco": "^7.1.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "^13.2.1",
+    "ahooks": "^3.7.7",
+    "antd": "5.4.7",
+    "axios": "^1.4.0",
+    "jotai": "^2.1.0",
+    "plotly.js": "^2.23.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-plotly.js": "^2.6.0",
+    "react-router-dom": "^6.11.1",
+    "react-scripts": "5.0.1",
+    "smiles-drawer": "2.0.3",
+    "virtuallist-antd": "^0.7.6",
+    "web-vitals": "^2.1.0"
+  },
   "scripts": {
-    "electron-dev": "electron .",
+    "pack-dir": "electron-builder --dir",
+    "pack": "electron-builder",
+    "dist-dir": "craco build && electron-builder --dir",
+    "dist": "craco build && electron-builder",
+    "ele": "electron .",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "craco eject",
-    "pack": "electron-builder --dir",
-    "dist": "craco build && electron-builder"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "eject": "react-scripts eject"
   },
   "browserslist": {
     "production": [
@@ -53,25 +91,11 @@
       "last 1 safari version"
     ]
   },
-  "dependencies": {
-    "ahooks": "^2.10.11",
-    "antd": "^4.16.13",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-router-dom": "^5.3.0",
-    "react-scripts": "4.0.3"
-  },
   "devDependencies": {
-    "@craco/craco": "^6.3.0",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "concurrently": "^6.3.0",
-    "craco-less": "^1.20.0",
-    "electron": "^15.1.2",
-    "electron-builder": "^22.13.1",
-    "electron-squirrel-startup": "^1.0.0",
-    "wait-on": "^6.0.0",
-    "web-vitals": "^1.1.2"
+    "babel-eslint": "^10.1.0",
+    "electron": "24.3.0",
+    "electron-builder": "23.6.0",
+    "eslint-config-react": "^1.1.7",
+    "eslint-config-react-app": "^7.0.1"
   }
 }

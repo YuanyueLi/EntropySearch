@@ -1,21 +1,27 @@
-import './App.less';
-import {HashRouter as Router, Switch, Route} from "react-router-dom";
+import 'antd/dist/reset.css';
+import './App.css';
+import React, {Suspense} from 'react';
+import {BrowserRouter, Routes, Route, MemoryRouter} from "react-router-dom";
 
-import EntropySearchParameters from "./components/EntropySearchParameters";
-import MassSearchResult from "./components/EntropySearchResult";
-
+import Template from "./Pages/Global/Template";
+import MainInput from "./Pages/Input/Main";
+import MainResult from "./Pages/Result/Main";
 
 function App() {
-    return <div className="App">
-        <Router>
-            <Switch>
-                <Route path="/parameter" component={EntropySearchParameters}/>
-                <Route path="/result" component={MassSearchResult}/>
-                <Route path="/" exact component={EntropySearchParameters}/>
-            </Switch>
-        </Router>
-    </div>
-
+    return (
+        <div className="App">
+            <MemoryRouter>
+                <Routes>
+                    <Route index element={
+                        <Template><MainInput/></Template>
+                    }/>
+                    <Route path="result" element={
+                        <Template><MainResult/></Template>
+                    }/>
+                </Routes>
+            </MemoryRouter>
+        </div>
+    );
 }
 
 export default App;

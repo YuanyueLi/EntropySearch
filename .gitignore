@@ -5,6 +5,8 @@ __pycache__/
 frontend/node_modules/
 .idea/
 .vscode/
+test/
+py_env/
 
 # C extensions
 *.so
@@ -130,3 +132,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+backend/ms_entropy
+test/input/mona.msp
+test/input/mona.msp.eyJtcz.esi
+test/input/nist20_clean.msp
+test/input/query.msp
+test/input/query.msp.eyJtcz.esi
+test/input/test.lbm2
+test/input/test.lbm2.eyJtcz.esi
+test/input/test.mgf
+test/input/test.mgf.eyJtcz.esi
+test/input/test.msp
+test/input/test.msp.eyJtcz.esi
+test/input/test.mzML
+test/input/test.mzML.eyJtcz.esi
+test/debug/50-1.mzML
+test/debug/MSMS-Public-Neg-VS15.msp
+test/debug/MSMS-Public-Neg-VS15.msp.eyJtcz.esi
+frontend/yarn.lock

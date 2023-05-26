@@ -1,0 +1,10 @@
+Cython==0.29.34
+fastapi==0.95.1
+ms-entropy==0.5.7
+msgpack==1.0.5
+numpy==1.24.3
+pyinstaller==5.11.0
+pyinstaller-hooks-contrib==2023.3
+pymzml==2.5.2
+uvicorn==0.22.0
+lxml==4.9.2
