@@ -10,23 +10,12 @@
   "main": "public/electron.js",
   "build": {
     "productName": "EntropySearch",
-    "files": [
-      "build/**/*",
-      "node_modules/**/*"
-    ],
     "directories": {
       "buildResources": "assets"
     },
     "extraFiles": [
       {
         "from": "../backend/dist/",
-        "to": ".",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "./dist/",
         "to": ".",
         "filter": [
           "**/*"
