@@ -28,10 +28,11 @@ function createWindow() {
     let backend = ""
     if (process.platform === 'win32') {
         backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+    } else if (process.platform === 'darwin') {
+        backend = path.join(__dirname, '../../../entropy_search_backend')
     } else {
         backend = 'entropy_search_backend'
     }
-    console.log("Backend: " + backend)
     backgroundProcess = require('child_process').exec(backend, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`)
