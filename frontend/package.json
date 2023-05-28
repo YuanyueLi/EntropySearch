@@ -5,38 +5,17 @@
   "author": {
     "name": "Yuanyue Li"
   },
-  "private": true,
+  "license": "Apache-2.0",
   "homepage": ".",
   "main": "public/electron.js",
   "build": {
-    "productName": "Entropy Search",
+    "productName": "EntropySearch",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
     "directories": {
-      "buildResources": "build",
-      "output": "dist"
-    },
-    "win": {
-      "target": [
-        {
-          "target": "portable"
-        }
-      ],
-      "icon": "build/icon.png"
-    },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage"
-        }
-      ],
-      "icon": "build/icon.png"
-    },
-    "mac": {
-      "target": [
-        {
-          "target": "dmg"
-        }
-      ],
-      "icon": "build/icon.png"
+      "buildResources": "assets"
     },
     "extraFiles": [
       {
@@ -45,15 +24,33 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "./dist/",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
       }
-    ]
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Science",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.png"
+    }
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@craco/craco": "^7.1.0",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
     "ahooks": "^3.7.7",
     "antd": "5.4.7",
     "axios": "^1.4.0",
@@ -69,15 +66,20 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "pack-dir": "electron-builder --dir",
-    "pack": "electron-builder",
-    "dist-dir": "craco build && electron-builder --dir",
+    "pack": "craco build && electron-builder --dir",
     "dist": "craco build && electron-builder",
-    "ele": "electron .",
+    "electron": "electron .",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "electron": "24.3.0",
+    "electron-builder": "23.6.0",
+    "eslint-config-react": "^1.1.7",
+    "eslint-config-react-app": "^7.0.1"
   },
   "browserslist": {
     "production": [
@@ -90,12 +92,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "electron": "24.3.0",
-    "electron-builder": "23.6.0",
-    "eslint-config-react": "^1.1.7",
-    "eslint-config-react-app": "^7.0.1"
   }
 }

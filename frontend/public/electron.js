@@ -1,5 +1,7 @@
-const {app, BrowserWindow, globalShortcut} = require('electron')
+const { app, BrowserWindow, globalShortcut } = require('electron')
 const gotTheLock = app.requestSingleInstanceLock()
+
+let backgroundProcess
 
 
 function createWindow() {
@@ -19,40 +21,28 @@ function createWindow() {
     const path = require('path');
 
     //load the index.html from a url
-    //win.loadURL("http://localhost:3000/parameter")
-    win.loadURL(url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true,
-    }))
+    win.loadURL(`file://${path.join(__dirname, 'index.html')}`);
+    win.on('closed', () => mainWindow = null);
 
     // Select based on the OS
     let backend = ""
     if (process.platform === 'win32') {
         backend = path.join(process.cwd(), 'entropy_search_backend.exe')
-    } else if (process.platform === 'darwin') {
-        backend = path.join(process.cwd(), 'entropy_search_backend.exe')
     } else {
-        backend = path.join(process.cwd(), 'entropy_search_backend.exe')
+        backend = 'entropy_search_backend'
     }
     console.log("Backend: " + backend)
-    var execfile = require("child_process").execFile;
-    execfile(backend, {windowsHide: false,},
-        (err, stdout, stderr) => {
-            if (err) {
-                console.log(err);
-            }
-            if (stdout) {
-                console.log(stdout);
-            }
-            if (stderr) {
-                console.log(stderr);
-            }
+    backgroundProcess = require('child_process').exec(backend, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`exec error: ${error}`)
+            return
         }
-    )
+        console.log(`stdout: ${stdout}`)
+        console.error(`stderr: ${stderr}`)
+    })
 
     // Open the DevTools.
-    //win.webContents.openDevTools()
+    // win.webContents.openDevTools()
 
     // set the Menu to null
     win.setMenu(null)
@@ -88,7 +78,7 @@ if (!gotTheLock) {
     // for applications and their menu bar to stay active until the user quits
     // explicitly with Cmd + Q.
     app.on('window-all-closed', () => {
-        const {exec} = require("child_process");
+        const { exec } = require("child_process");
         // Kill the backend process based on the OS
         if (process.platform === 'win32') {
             exec("taskkill /f /t /im entropy_search_backend.exe", (err, stdout, stderr) => {
@@ -100,7 +90,7 @@ if (!gotTheLock) {
                 console.log(`stderr: ${stderr}`);
             });
         } else {
-            exec("killall entropy_search_backend.exe", (err, stdout, stderr) => {
+            exec("killall entropy_search_backend", (err, stdout, stderr) => {
                 if (err) {
                     console.log(err)
                     return;
@@ -118,9 +108,13 @@ if (!gotTheLock) {
     app.on('activate', () => {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
-
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow()
         }
+    })
+
+    // Kill the background process when the app exits
+    app.on('will-quit', () => {
+        backgroundProcess.kill()
     })
 }

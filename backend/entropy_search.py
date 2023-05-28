@@ -325,7 +325,7 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/p/FastEntropySearch/gui/test/debug/50-1.mzML",
+        "file_query": r"/home/yli/tmp/GNPS-LIBRARY.mgf",
         "file_library": r"/p/FastEntropySearch/gui/test/debug/MSMS-Public-Neg-VS15.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
