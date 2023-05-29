@@ -32,7 +32,7 @@ const ModalInfo = () => {
         <br/>
         <Row align={"middle"} justify={"center"}>
             <Col span={24}>
-                <>{jobStatus.is_finished ? <>
+                <>{(!jobStatus.is_running) ? <>
                     <p>Spectral search has been finished. You can view the results now. </p>
                 </> : <>{jobStatus.is_ready ? <>
                     <p>Spectral search hasn't been finished yet, but you can still view part of the results now.</p>
@@ -45,7 +45,7 @@ const ModalInfo = () => {
                 <Button type="primary" onClick={() => {
                     setShowModalInfo(false)
                     navigate("/result")
-                }}>  View results</Button>
+                }}> View results</Button>
             </> : <></>}
         </Row>
     </Modal>

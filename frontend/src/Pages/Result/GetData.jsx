@@ -44,10 +44,10 @@ const Main = () => {
     });
     const [getAtomJobStatus] = useAtom(atomJobStatus);
     useEffect(() => {
-        if (getAtomJobStatus.is_finished) {
+        if (!getAtomJobStatus.is_running) {
             getAllSpectra.run();
         }
-    }, [getAtomJobStatus.is_finished])
+    }, [getAtomJobStatus.is_running])
 
     const getOneSpectrum = useRequest(url.getOneSpectrum, {
         manual: true,

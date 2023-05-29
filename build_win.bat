@@ -1,4 +1,4 @@
-call python3 -m venv py_env
+call python -m venv py_env
 call py_env\Scripts\activate.bat
 call pip install -r requirements.txt
 
