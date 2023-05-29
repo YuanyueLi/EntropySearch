@@ -25,6 +25,7 @@ class EntropySearch:
         self.spectral_library = None
         self.all_spectra = []
         self.scan_number_to_index = {}
+        self.all_processes = []
 
         self.status = ""
         self.ready = False
@@ -108,10 +109,10 @@ class EntropySearch:
                 queue_input, queue_output = mp.Queue(), mp.Queue()
                 queue_input_num = 0
 
-                all_processes = [mp.Process(target=worker_search_one_spectrum,
+                self.all_processes = [mp.Process(target=worker_search_one_spectrum,
                                             args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,), queue_input, queue_output))
                                  for _ in range(cores)]
-                for p in all_processes:
+                for p in self.all_processes:
                     p.start()
 
                 for spec in read_one_spectrum(file_query):
@@ -143,8 +144,11 @@ class EntropySearch:
                         self.status = f"Searching {file_query.name}... {processed_spec_num} spectra searched"
                         # print(f"Total: {total_spec_num}, Processed: {processed_spec_num}, Remaining: {queue_input_num}")
 
-                for p in all_processes:
+                for p in self.all_processes:
                     p.join()
+
+                self.all_processes = []
+
             self.finished = True
             self.status = ""
             return all_results
@@ -156,6 +160,16 @@ class EntropySearch:
             self.finished = False
             self.error = True
             return []
+        
+    def exit(self):
+        for p in self.all_processes:
+            try:
+                p.terminate()
+                p.join()
+            except:
+                pass
+        self.all_processes = []
+
 
     def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
         # Search spectra

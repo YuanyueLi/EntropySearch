@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import sys
+import asyncio
 import base64
 import copy
 import datetime
 import json
 import multiprocessing
-from typing import Annotated, Union
+import sys
 
 import numpy as np
 import uvicorn
@@ -153,10 +153,25 @@ async def read_root():
     return {"Hello": "World"}
 
 
+# Exit
+@app.get("/exit")
+async def exit():
+    try:
+        entropy_search_worker.exit()
+    except:
+        pass
+    finally:
+        loop=asyncio.get_running_loop()
+        loop.stop()
+
+
 if __name__ == "__main__":    
     # Modify in case of Windows and MacOS
     if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
-    uvicorn.run(app, host="localhost", port=8711)
+    try:
+        uvicorn.run(app, host="localhost", port=8711)
+    except:
+        pass
