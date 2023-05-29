@@ -48,11 +48,14 @@ function createWindow() {
 
     // set the Menu to null
     win.setMenu(null)
-    globalShortcut.register('f5', function () {
-        console.log('f5 is pressed')
-        win.reload()
+    // globalShortcut.register('f5', function () {
+    //     console.log('f5 is pressed')
+    //     win.reload()
+    // })
+    globalShortcut.register('f12', function () {
+        console.log('f12 is pressed')
+        win.webContents.openDevTools()
     })
-
 }
 
 let myWindow = null
@@ -72,14 +75,28 @@ if (!gotTheLock) {
     // Create myWindow, load the rest of the app, etc...
     app.whenReady().then(createWindow)
 
-    // This method will be called when Electron has finished
-    // initialization and is ready to create browser windows.
-    // Some APIs can only be used after this event occurs.
-
     // Quit when all windows are closed, except on macOS. There, it's common
     // for applications and their menu bar to stay active until the user quits
     // explicitly with Cmd + Q.
-    app.on('window-all-closed', () => {
+    // app.on('window-all-closed', () => {
+    // })
+
+    app.on('activate', () => {
+        // On macOS it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow()
+        }
+    })
+
+    // Kill the background process when the app exits
+    app.on('will-quit', () => {
+        // Send the kill signal to the background process by GET request
+        const axios = require('axios')
+        axios.get('http://localhost:8711/exit')
+
+        backgroundProcess.kill()
+
         const { exec } = require("child_process");
         // Kill the backend process based on the OS
         if (process.platform === 'win32') {
@@ -105,18 +122,5 @@ if (!gotTheLock) {
         if (process.platform !== 'darwin') {
             app.quit()
         }
-    })
-
-    app.on('activate', () => {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow()
-        }
-    })
-
-    // Kill the background process when the app exits
-    app.on('will-quit', () => {
-        backgroundProcess.kill()
     })
 }

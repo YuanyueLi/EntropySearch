@@ -26,11 +26,21 @@ class EntropySearch:
         self.all_spectra = []
         self.scan_number_to_index = {}
         self.all_processes = []
+        self.queue_input = None
+        self.queue_output = None
 
-        self.status = ""
-        self.ready = False
-        self.finished = False
-        self.error = False
+        # Status
+        # 1. When program starts, status is ready: False, running: False, error: False
+        # 2. When program starts searching, status is ready: False, running: True, error: False
+        # 3. When program finishes reading all spectra, but not all spectra have been searched, status is ready: True, running: True, error: False
+        # 4. When program finishes searching all spectra, status is ready: True, running: False, error: False
+        # 5. When program finds error, status is ready: False, running: False, error: True
+        self.status = {
+            "ready": False,  # True means ready to display results, if error found, ready will be False.
+            "running": False,  # True means searching is running, False means searching is not running.
+            "error": False,  # True means error found
+            "message": ""  # Message to display
+        }
 
     def search_one_spectrum(self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da):
         spec = _parse_spectrum(spec)
@@ -85,7 +95,7 @@ class EntropySearch:
         spec_idx = self.scan_number_to_index[scan_number]
         spectrum_result = None
         spectrum_result = copy.copy(self.all_spectra[spec_idx])
-        if not self.finished:
+        if self.status["running"]:
             spectrum_result.update(self.search_one_spectrum(spectrum_result, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da))
 
         search_type_keys = ["identity_search", "open_search", "neutral_loss_search", "hybrid_search"]
@@ -102,37 +112,45 @@ class EntropySearch:
         # Search spectra
         all_results = []
         file_query = Path(file_query)
-        self.status = f"Searching {file_query.name}..."
+        self.status = {
+            "ready": False,
+            "running": True,
+            "error": False,
+            "message": f"Start reading {file_query.name}..."
+        }
 
         try:
             if cores > 0:
-                queue_input, queue_output = mp.Queue(), mp.Queue()
+                self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
                 queue_input_num = 0
 
-                self.all_processes = [mp.Process(target=worker_search_one_spectrum,
-                                            args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,), queue_input, queue_output))
-                                 for _ in range(cores)]
+                self.all_processes = [
+                    mp.Process(
+                        target=worker_search_one_spectrum,
+                        args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,),
+                              self.queue_input, self.queue_output)) for _ in range(cores)]
                 for p in self.all_processes:
                     p.start()
 
                 for spec in read_one_spectrum(file_query):
                     if spec.pop("_ms_level", 2) != 2:
                         continue
-                    queue_input.put((spec,))
+                    self.queue_input.put((spec,))
                     self.all_spectra.append(spec)
                     self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
                     queue_input_num += 1
 
                     if queue_input_num % 1000 == 0:
-                        self.status = f"Reading {file_query.name}... {queue_input_num} spectra read"
+                        self.status["message"] = f"Reading {file_query.name}... {queue_input_num} spectra read"
 
-                self.ready = True
+                # Set ready to display results signal
+                self.status["ready"] = True
                 for _ in range(cores):
-                    queue_input.put(None)
+                    self.queue_input.put(None)
 
                 total_spec_num = queue_input_num
                 while queue_input_num > 0:
-                    cur_result = queue_output.get()
+                    cur_result = self.queue_output.get()
                     queue_input_num -= 1
                     # Merge results into original file
                     if cur_result is not None:
@@ -141,7 +159,7 @@ class EntropySearch:
 
                     processed_spec_num = total_spec_num - queue_input_num
                     if processed_spec_num % 100 == 0:
-                        self.status = f"Searching {file_query.name}... {processed_spec_num} spectra searched"
+                        self.status["message"] = f"{processed_spec_num} spectra searched, about {queue_input_num} remaining"
                         # print(f"Total: {total_spec_num}, Processed: {processed_spec_num}, Remaining: {queue_input_num}")
 
                 for p in self.all_processes:
@@ -149,32 +167,82 @@ class EntropySearch:
 
                 self.all_processes = []
 
-            self.finished = True
-            self.status = ""
+            # Set success finished signal
+            self.status = {
+                "ready": True,
+                "running": False,
+                "error": False,
+                "message": f"",
+            }
             return all_results
         except Exception as e:
             import traceback
             traceback.print_exc()
-            self.status = f"Error: {e}"
-            self.ready = False
-            self.finished = False
-            self.error = True
+            self.status = {
+                "ready": False,
+                "message": f"Error: {e}",
+                "error": True,
+                "running": False,
+            }
             return []
-        
+
+    def stop(self, timeout=None):
+        self.status = {
+            "ready": False,
+            "message": "Stopping...",
+            "error": False,
+            "running": False,
+        }
+
+        # Clear the input queue
+        if self.queue_input is not None:
+            while not self.queue_input.empty():
+                self.queue_input.get()
+            # Put None to the input queue
+            for _ in range(len(self.all_processes)):
+                self.queue_input.put(None)
+
+        # Join all processes
+        for p in self.all_processes:
+            p.join(timeout)
+
+        # Clear the input queue again
+        if self.queue_input is not None:
+            while not self.queue_input.empty():
+                self.queue_input.get()
+        self.queue_input.close()
+        self.queue_input = None
+
+        self.queue_output.close()
+        self.queue_output = None
+
+        self.status = {
+            "ready": False,
+            "message": "Stopping...",
+            "error": False,
+            "running": False,
+        }
+
     def exit(self):
+        self.stop(0.1)
+        # Kill all processes
         for p in self.all_processes:
             try:
-                p.terminate()
+                p.kill()
                 p.join()
             except:
                 pass
         self.all_processes = []
 
-
     def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
         # Search spectra
         all_results = []
-        self.status = f"Searching {file_query.name}..."
+        self.status = {
+            "ready": False,
+            "running": True,
+            "error": False,
+            "message": f"Start reading {file_query.name}..."
+        }
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
             if spec.pop("_ms_level", 2) != 2:
                 continue
@@ -184,17 +252,26 @@ class EntropySearch:
             # if len(all_results) > 100:
             #     break
             if spec_num % 100 == 0:
-                self.status = f"Searching {file_query.name}... {spec_num} spectra searched"
+                self.status["message"] = f"Searching {file_query.name}... {spec_num} spectra searched"
 
-        self.finished = True
+        self.status = {
+            "ready": True,
+            "running": False,
+            "error": False,
+            "message": f"",
+        }
         return all_results
 
     def load_spectral_library(self, file_library) -> None:
         file_library = Path(file_library)
-        self.finished = False
-        self.ready = False
+        self.status = {
+            "ready": False,
+            "running": True,
+            "error": False,
+            "message": "Start loading spectral library...",
+        }
 
-        self.status = f"Loading {file_library.name}..."
+        self.status["message"] = f"Loading {file_library.name}..."
         # Check if the library is already indexed
         self._build_spectral_library(file_library)
 
@@ -216,7 +293,7 @@ class EntropySearch:
                 return True
             except:
                 pass
-        
+
         # Check if the library is existed
         file_library_index = file_library.parent / (file_library.name + "." + index_hash + ".esi")
         library_name = ".".join(file_library_index.stem.split(".")[:-2])
@@ -253,10 +330,10 @@ class EntropySearch:
             spectral_number += 1
 
             if spectral_number % 1000 == 0:
-                self.status = f"Loading {spectral_number} spectra from {library_name}..."
+                self.status["message"] = f"Loading {spectral_number} spectra from {library_name}..."
 
         # Build index
-        self.status = f"Building index for {library_name}..."
+        self.status["message"] = f"Building index for {library_name}..."
         for charge, spectra in spectral_library.items():
             entropy_search = FlashEntropySearch(max_ms2_tolerance_in_da=self.ms2_tolerance_in_da)
             all_library_spectra = entropy_search.build_index(all_spectra_list=spectra, min_ms2_difference_in_da=2*self.ms2_tolerance_in_da)
@@ -275,7 +352,7 @@ class EntropySearch:
 
             spectral_library[charge] = entropy_search
 
-        self.status = f"Saving index for {library_name}..."
+        self.status["message"] = f"Saving index for {library_name}..."
         # Save index
         with open(file_library_index, "wb") as f:
             pickle.dump(spectral_library, f)

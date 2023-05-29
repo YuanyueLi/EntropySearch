@@ -5,6 +5,8 @@ import copy
 import datetime
 import json
 import multiprocessing
+import os
+import signal
 import sys
 
 import numpy as np
@@ -77,7 +79,7 @@ def run_entropy_search(info: dict):
 
 
 @app.post("/entropy_search")
-async def entropy_search_worker(info: InfoForEntropySearch, background_tasks: BackgroundTasks):
+async def entropy_search(info: InfoForEntropySearch, background_tasks: BackgroundTasks):
     background_tasks.add_task(run_entropy_search, info.dict())
     return {"file_query": info.file_query}
 
@@ -127,13 +129,22 @@ async def get_all_spectra():
 @app.get("/get/status")
 async def get_status():
     try:
-        return {"status": entropy_search_worker.status,
-                "is_ready": entropy_search_worker.ready,
-                "is_finished": entropy_search_worker.finished}
-    except:
-        return {"status": "not started",
+        if entropy_search_worker is None:
+            return {"status": "Preparing to start searching",
+                    "is_ready": False,
+                    "is_running": False,
+                    "is_error": False}
+        else:
+            status = entropy_search_worker.status
+            return {"status": status["message"],
+                    "is_ready": status["ready"],
+                    "is_running": status["running"],
+                    "is_error": status["error"]}
+    except Exception as e:
+        return {"status": f"Error: {e}",
                 "is_ready": False,
-                "is_finished": False}
+                "is_running": False,
+                "is_error": True}
 
 
 # Get maximum cpu cores
@@ -158,20 +169,16 @@ async def read_root():
 async def exit():
     try:
         entropy_search_worker.exit()
-    except:
+    except Exception as e:
+        print("Error found when exiting: ", e)
         pass
-    finally:
-        loop=asyncio.get_running_loop()
-        loop.stop()
+    os.kill(os.getpid(), signal.SIGKILL)
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     # Modify in case of Windows and MacOS
     if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
-    try:
-        uvicorn.run(app, host="localhost", port=8711)
-    except:
-        pass
+    uvicorn.run(app, host="localhost", port=8711)
