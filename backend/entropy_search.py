@@ -309,28 +309,31 @@ class EntropySearch:
         spectral_number = 0
         # Read spectra
         for spec in read_one_spectrum(file_library):
-            spec = _parse_spectrum(spec)
+            try:
+                spec = _parse_spectrum(spec)
 
-            if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec.get("_ms_level", 2) != 2:
+                if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec.get("_ms_level", 2) != 2:
+                    continue
+
+                charge = spec["charge"]
+                if charge not in spectral_library:
+                    spectral_library[charge] = []
+
+                all_spec_keys = list(spec.keys())
+                all_spec_keys.remove("peaks")
+                all_spec_keys.remove("precursor_mz")
+                all_spec_keys.remove("_ms_level")
+                for k in all_spec_keys:
+                    spec["library-"+k] = spec.pop(k)
+                spec["library-file_name"] = library_name
+
+                spectral_library[charge].append(spec)
+                spectral_number += 1
+
+                if spectral_number % 1000 == 0:
+                    self.status["message"] = f"Loading {spectral_number} spectra from {library_name}..."
+            except:
                 continue
-
-            charge = spec["charge"]
-            if charge not in spectral_library:
-                spectral_library[charge] = []
-
-            all_spec_keys = list(spec.keys())
-            all_spec_keys.remove("peaks")
-            all_spec_keys.remove("precursor_mz")
-            all_spec_keys.remove("_ms_level")
-            for k in all_spec_keys:
-                spec["library-"+k] = spec.pop(k)
-            spec["library-file_name"] = library_name
-
-            spectral_library[charge].append(spec)
-            spectral_number += 1
-
-            if spectral_number % 1000 == 0:
-                self.status["message"] = f"Loading {spectral_number} spectra from {library_name}..."
 
         # Build index
         self.status["message"] = f"Building index for {library_name}..."
