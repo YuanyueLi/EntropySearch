@@ -63,7 +63,7 @@ class InfoForEntropySearch(BaseModel):
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
     cores: int = 1
-    charge: str = ""
+    charge: int = 0
 
 
 def run_entropy_search(info: dict):

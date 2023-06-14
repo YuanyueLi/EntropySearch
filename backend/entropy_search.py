@@ -120,9 +120,11 @@ class EntropySearch:
         }
 
         try:
+            if charge == 0:
+                charge = None
             if charge is not None:
-                charge=str(charge).strip()
-                if charge == "" or charge == "0":
+                charge = str(charge).strip()
+                if charge == "":
                     charge = None
             if cores > 0:
                 self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
