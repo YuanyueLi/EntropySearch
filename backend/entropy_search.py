@@ -108,7 +108,7 @@ class EntropySearch:
 
         return spectrum_result
 
-    def search_file(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
+    def search_file(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=2):
         # Search spectra
         all_results = []
         file_query = Path(file_query)
@@ -120,6 +120,10 @@ class EntropySearch:
         }
 
         try:
+            if charge is not None:
+                charge=str(charge).strip()
+                if charge == "" or charge == "0":
+                    charge = None
             if cores > 0:
                 self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
                 queue_input_num = 0
@@ -135,6 +139,8 @@ class EntropySearch:
                 for spec in read_one_spectrum(file_query):
                     if spec.pop("_ms_level", 2) != 2:
                         continue
+                    if charge is not None:
+                        spec["charge"] = charge
                     self.queue_input.put((spec,))
                     self.all_spectra.append(spec)
                     self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
@@ -419,7 +425,7 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/home/yli/tmp/GNPS-LIBRARY.mgf",
+        "file_query": r"/p/FastEntropySearch/gui/test/input/Kaempferol_100uM.MSP",
         "file_library": r"/p/FastEntropySearch/gui/test/debug/MSMS-Public-Neg-VS15.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
@@ -427,7 +433,8 @@ if __name__ == '__main__':
     }
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
-    all_results = entropy_search.search_file(Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], para["cores"])
+    all_results = entropy_search.search_file(
+        Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], cores=para["cores"])
     a = 1
     # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
     # print(test)

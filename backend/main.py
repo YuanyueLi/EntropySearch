@@ -63,6 +63,7 @@ class InfoForEntropySearch(BaseModel):
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
     cores: int = 1
+    charge: str = ""
 
 
 def run_entropy_search(info: dict):
@@ -73,7 +74,9 @@ def run_entropy_search(info: dict):
     global entropy_search_worker
     entropy_search_worker = EntropySearch(info["ms2_tolerance_in_da"])
     entropy_search_worker.load_spectral_library(info["file_library"])
-    entropy_search_worker.search_file(info["file_query"], info["top_n"], info["ms1_tolerance_in_da"], info["ms2_tolerance_in_da"], info["cores"])
+    entropy_search_worker.search_file(
+        info["file_query"], info["top_n"], info["ms1_tolerance_in_da"], info["ms2_tolerance_in_da"], charge=info["charge"], cores=info["cores"]
+    )
     print("Finish searching")
     return None
 
@@ -89,8 +92,14 @@ async def entropy_search(info: InfoForEntropySearch, background_tasks: Backgroun
 @app.get("/get/one_spectrum/{scan}")
 async def get_one_spectrum(scan: int):
     try:
-        return json.loads(json.dumps(entropy_search_worker.get_one_spectrum_result(
-            scan, search_parameters["top_n"], search_parameters["ms1_tolerance_in_da"], search_parameters["ms2_tolerance_in_da"]), cls=NumpyEncoder))
+        return json.loads(
+            json.dumps(
+                entropy_search_worker.get_one_spectrum_result(
+                    scan, search_parameters["top_n"], search_parameters["ms1_tolerance_in_da"], search_parameters["ms2_tolerance_in_da"]
+                ),
+                cls=NumpyEncoder,
+            )
+        )
     except Exception as e:
         return []
 
@@ -130,21 +139,12 @@ async def get_all_spectra():
 async def get_status():
     try:
         if entropy_search_worker is None:
-            return {"status": "Preparing to start searching",
-                    "is_ready": False,
-                    "is_running": False,
-                    "is_error": False}
+            return {"status": "Preparing to start searching", "is_ready": False, "is_running": False, "is_error": False}
         else:
             status = entropy_search_worker.status
-            return {"status": status["message"],
-                    "is_ready": status["ready"],
-                    "is_running": status["running"],
-                    "is_error": status["error"]}
+            return {"status": status["message"], "is_ready": status["ready"], "is_running": status["running"], "is_error": status["error"]}
     except Exception as e:
-        return {"status": f"Error: {e}",
-                "is_ready": False,
-                "is_running": False,
-                "is_error": True}
+        return {"status": f"Error: {e}", "is_ready": False, "is_running": False, "is_error": True}
 
 
 # Get maximum cpu cores
@@ -177,7 +177,7 @@ async def exit():
 
 if __name__ == "__main__":
     # Modify in case of Windows and MacOS
-    if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
+    if sys.platform.startswith("win") or sys.platform.startswith("darwin"):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
