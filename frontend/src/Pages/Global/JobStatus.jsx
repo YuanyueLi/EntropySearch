@@ -1,6 +1,6 @@
 import React, {Suspense, useState, useEffect} from "react";
 import {atom, useAtom} from 'jotai'
-import {message, notification} from "antd";
+import {message, notification, Spin, Space} from "antd";
 import {useRequest} from "ahooks";
 import {url} from "../Global/Config";
 
@@ -47,10 +47,10 @@ const JobStatus = () => {
         },
         onError: (error, params) => {
             console.log(error)
-            errorNotification.error({
+            errorNotification.info({
                 key: "jobStatus",
-                message: "Error",
-                description: "Cannot connect to the backend",
+                message: "Waiting for the backend",
+                description: <Space><Spin/>Connecting to the backend</Space>,
                 duration: 0,
                 placement: "top",
             })

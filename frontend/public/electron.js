@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const {app, BrowserWindow, globalShortcut} = require('electron')
 const gotTheLock = app.requestSingleInstanceLock()
 
 let backgroundProcess
@@ -21,7 +21,7 @@ function createWindow() {
     const url = require('url');
     const path = require('path');
 
-    //load the index.html from a url
+    //load the index.html from an url
     win.loadURL(`file://${path.join(__dirname, 'index.html')}`);
     win.on('closed', () => mainWindow = null);
 
@@ -97,7 +97,7 @@ if (!gotTheLock) {
 
         backgroundProcess.kill()
 
-        const { exec } = require("child_process");
+        const {exec} = require("child_process");
         // Kill the backend process based on the OS
         if (process.platform === 'win32') {
             exec("taskkill /f /t /im entropy_search_backend.exe", (err, stdout, stderr) => {
