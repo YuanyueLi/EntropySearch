@@ -15,6 +15,7 @@ const InputParameters = (showNext) => {
         file_query: "",
         file_library: "",
         path_output: "/p/FastEntropySearch/gui/test/output/",
+        charge: 0,
         ms1_tolerance_in_da: 0.01,
         ms2_tolerance_in_da: 0.02,
         top_n: 100,
@@ -91,6 +92,10 @@ const InputParameters = (showNext) => {
                         {/*           rules={[{required: true}]}>*/}
                         {/*    <Input/>*/}
                         {/*</Form.Item>*/}
+                        <Form.Item label={"Charge (set to 0 for auto-detection)"} name={"charge"}
+                                   {...formStyle2}>
+                            <InputNumber min={-10} step={1}/>
+                        </Form.Item>
                         <Form.Item label={"Report top n hits"} name={"top_n"}
                                    {...formStyle2}>
                             <InputNumber min={1} step={10}/>

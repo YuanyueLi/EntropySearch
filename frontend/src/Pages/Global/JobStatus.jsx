@@ -15,7 +15,7 @@ const JobStatus = () => {
     const [errorNotification, contextHolderErrorNotification] = notification.useNotification();
 
     const getJobStatus = useRequest(url.getStatus, {
-        pollingInterval: 1000,
+        pollingInterval: 3000,
         onSuccess: (result, params) => {
             errorNotification.destroy("jobStatus")
             const data = result.data;
