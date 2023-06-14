@@ -15,7 +15,7 @@ const JobStatus = () => {
     const [errorNotification, contextHolderErrorNotification] = notification.useNotification();
 
     const getJobStatus = useRequest(url.getStatus, {
-        pollingInterval: 3000,
+        pollingInterval: 1000,
         onSuccess: (result, params) => {
             errorNotification.destroy("jobStatus")
             const data = result.data;
@@ -49,8 +49,8 @@ const JobStatus = () => {
             console.log(error)
             errorNotification.info({
                 key: "jobStatus",
-                message: "Waiting for the backend",
-                description: <Space><Spin/>Connecting to the backend</Space>,
+                message: "Software is busy",
+                description: <Space><Spin/>Connecting to the backend...</Space>,
                 duration: 0,
                 placement: "top",
             })
