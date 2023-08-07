@@ -1,6 +1,6 @@
 Cython==0.29.34
 fastapi==0.95.1
-ms-entropy==0.5.8
+ms-entropy
 msgpack==1.0.5
 numpy==1.24.3
 pyinstaller==5.11.0
