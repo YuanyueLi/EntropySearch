@@ -24,16 +24,19 @@
     ],
     "mac": {
       "target": "dmg",
+      "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
       "category": "public.app-category.productivity",
       "icon": "build/icon.png"
     },
     "linux": {
       "target": "AppImage",
+      "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
       "category": "Science",
       "icon": "build/icon.png"
     },
     "win": {
       "target": "NSIS",
+      "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
       "icon": "build/icon.png"
     }
   },
