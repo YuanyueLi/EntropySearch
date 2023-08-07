@@ -47,21 +47,19 @@ jobs:
           yarn run dist
           ls -l dist
 
-    #   - name: Rename electron release
-    #     run: |
-    #       cd frontend
-    #       mv dist/entropy_search_frontend-0.1.0.dmg dist/entropy_search_frontend.dmg
-    #       mv dist/entropy_search_frontend-0.1.0.AppImage dist/entropy_search_frontend.AppImage
-    #       mv dist/entropy_search_frontend-0.1.0.exe dist/entropy_search_frontend.exe
-    #       mv dist/entropy_search_frontend-0.1.0.tar.gz dist/entropy_search_frontend.tar.gz
-
       - name: Deploy to release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            frontend/dist/EntropySearch*
+            frontend/dist/EntropySearch*.AppImage
+            frontend/dist/EntropySearch*.dmg
+            frontend/dist/EntropySearch*.exe
           tag_name: ${{github.sha}}
-          body: ${{github.event.inputs.body}}
+          name: GUI for the Flash Entropy Search
+          body: >
+            This is the GUI for the Flash Entropy Search.
+            The .msp, .mgf, .mzML, .lbm2 file formats are supported.
+            You can download the file below based on your OS.
           draft: true
           prerelease: true
         env:
