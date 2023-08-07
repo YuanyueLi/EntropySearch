@@ -19,6 +19,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{matrix.node-version}}
+      
+      - name: Setup Yarn
+        run: npm install -g yarn
 
       - name: Install Python 3
         uses: actions/setup-python@v2
@@ -29,7 +32,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           cd frontend
-          npm install
+          yarn install
     
       - name: Build by Pyinstaller
         run: |
@@ -39,7 +42,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd frontend
-          npm run dist
+          yarn run dist
 
       - name: Deploy to release
         uses: softprops/action-gh-release@v1
