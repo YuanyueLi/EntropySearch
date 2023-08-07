@@ -139,14 +139,18 @@ class EntropySearch:
                     p.start()
 
                 for spec in read_one_spectrum(file_query):
-                    if spec.pop("_ms_level", 2) != 2:
+                    try:
+                        if spec.pop("_ms_level", 2) != 2:
+                            continue
+                        if charge is not None:
+                            spec["charge"] = charge
+                        spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+                        self.queue_input.put((spec,))
+                        self.all_spectra.append(spec)
+                        self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
+                        queue_input_num += 1
+                    except Exception as e:
                         continue
-                    if charge is not None:
-                        spec["charge"] = charge
-                    self.queue_input.put((spec,))
-                    self.all_spectra.append(spec)
-                    self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
-                    queue_input_num += 1
 
                     if queue_input_num % 1000 == 0:
                         self.status["message"] = f"Reading {file_query.name}... {queue_input_num} spectra read"
@@ -252,15 +256,19 @@ class EntropySearch:
             "message": f"Start reading {file_query.name}..."
         }
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
-            if spec.pop("_ms_level", 2) != 2:
-                continue
+            try:
+                if spec.pop("_ms_level", 2) != 2:
+                    continue
+                spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
 
-            result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
-            all_results.append(result)
-            # if len(all_results) > 100:
-            #     break
-            if spec_num % 100 == 0:
-                self.status["message"] = f"Searching {file_query.name}... {spec_num} spectra searched"
+                result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
+                all_results.append(result)
+                # if len(all_results) > 100:
+                #     break
+                if spec_num % 100 == 0:
+                    self.status["message"] = f"Searching {file_query.name}... {spec_num} spectra searched"
+            except Exception as e:
+                continue
 
         self.status = {
             "ready": True,
@@ -318,6 +326,7 @@ class EntropySearch:
         # Read spectra
         for spec in read_one_spectrum(file_library):
             try:
+                spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
                 spec = _parse_spectrum(spec)
 
                 if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec.get("_ms_level", 2) != 2:
@@ -427,11 +436,11 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/p/FastEntropySearch/gui/test/input/Kaempferol_100uM.MSP",
-        "file_library": r"/p/FastEntropySearch/gui/test/debug/MSMS-Public-Neg-VS15.msp",
+        "file_query": r"/p/github/EntropySearch/test/test.msp",
+        "file_library": r"/p/github/EntropySearch/test/MoNA-export-Experimental_Spectra.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
-        "file_output": r"/p/FastEntropySearch/gui/test/output/result.csv",
+        "file_output": r"/p/github/EntropySearch/test/result.csv",
     }
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
