@@ -436,8 +436,8 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/p/github/EntropySearch/test/test.msp",
-        "file_library": r"/p/github/EntropySearch/test/MoNA-export-Experimental_Spectra.msp",
+        "file_query": r"/p/github/EntropySearch/test/inhouse_Reverse_pos.msp",
+        "file_library": r"/p/github/EntropySearch/test/inhouse_Reverse_pos.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         "file_output": r"/p/github/EntropySearch/test/result.csv",
