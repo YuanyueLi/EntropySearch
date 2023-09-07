@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal, Card} from 'antd';
+import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal, Tooltip} from 'antd';
 import {UploadOutlined} from '@ant-design/icons';
 import {useRequest} from 'ahooks';
 import {url} from "../Global/Config";
@@ -92,10 +92,12 @@ const InputParameters = (showNext) => {
                         {/*           rules={[{required: true}]}>*/}
                         {/*    <Input/>*/}
                         {/*</Form.Item>*/}
-                        <Form.Item label={"Charge (set to 0 for auto-detection)"} name={"charge"}
-                                   {...formStyle2}>
-                            <InputNumber min={-10} step={1}/>
-                        </Form.Item>
+                        <Tooltip title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
+                            <Form.Item label={"Charge"} name={"charge"}
+                                    {...formStyle2}>
+                                <InputNumber min={-10} step={1}/>
+                            </Form.Item>
+                        </Tooltip>
                         <Form.Item label={"Report top n hits"} name={"top_n"}
                                    {...formStyle2}>
                             <InputNumber min={1} step={10}/>
