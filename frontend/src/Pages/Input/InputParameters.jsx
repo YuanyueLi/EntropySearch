@@ -92,12 +92,11 @@ const InputParameters = (showNext) => {
                         {/*           rules={[{required: true}]}>*/}
                         {/*    <Input/>*/}
                         {/*</Form.Item>*/}
-                            <Form.Item label={"Charge"} name={"charge"}
-                                    {...formStyle2}>
-                                <Tooltip title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
+                        <Tooltip title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
+                            <Form.Item label={"Charge"} name={"charge"} {...formStyle2}>
                                     <InputNumber min={-10} step={1}/>
-                                </Tooltip>
                             </Form.Item>
+                        </Tooltip>
                         <Form.Item label={"Report top n hits"} name={"top_n"}
                                    {...formStyle2}>
                             <InputNumber min={1} step={10}/>
