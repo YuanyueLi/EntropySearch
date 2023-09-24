@@ -80,6 +80,16 @@ class EntropySearch:
                 top_n_idx = top_n_idx[selected_idx]
                 top_n_score = top_n_score[selected_idx]
 
+                # Assign name when search_type is identity_search
+                if search_type == "identity_search" and len(top_n_idx) > 0:
+                    # Select the max score
+                    max_idx = np.argmax(top_n_score)
+                    # Get the library spectrum
+                    library_spec = entropy_search.abstract_library_spectra[top_n_idx[max_idx]]
+                    # Assign name
+                    result["name"] = library_spec["library-name"]
+                    result["adduct"] = library_spec["library-precursor_type"]
+
                 result[search_type] = [[spec["scan"], i, score_array[i]] for i in top_n_idx]
 
                 if len(top_n_score) > 0:
