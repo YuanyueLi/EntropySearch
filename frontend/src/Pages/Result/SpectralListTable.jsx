@@ -84,26 +84,25 @@ export default () => {
     }, [atomGlobalRun.spectra]);
 
     const [stateTextFile, setStateTextFile] = useState(null);
-    const createTextFile = function () {
-        const parser = new Parser();
-        const csv = parser.parse(stateData);
-        // console.log(csv);
-        // const text=JSON.stringify(stateData, null, 2)
-        var data = new Blob([csv], {type: 'text/plain'});
-        if (stateTextFile !== null) {
-            window.URL.revokeObjectURL(stateTextFile);
+    useEffect(() => {
+        if(stateData && stateData.length > 0){
+            const parser = new Parser();
+            const csv = parser.parse(stateData);
+            const data = new Blob([csv], {type: 'text/plain'});
+            if (stateTextFile !== null) {
+                window.URL.revokeObjectURL(stateTextFile);
+            }
+            const textFile = window.URL.createObjectURL(data);
+            setStateTextFile(textFile);
         }
-        const textFile = window.URL.createObjectURL(data);
-        setStateTextFile(textFile);
-    }
+    },[stateData]);
 
     return <>
         <Row justify="end">
             <>
-                <Button onClick={() => {createTextFile()}}>Export results to .csv file</Button>
                 {
                     stateTextFile ? <>
-                        <a href={stateTextFile} download="result.csv">Download</a>
+                        <Button type={"primary"} href={stateTextFile} download="result.csv" >Export results</Button>
                     </> : <></>
                 }
             </>
