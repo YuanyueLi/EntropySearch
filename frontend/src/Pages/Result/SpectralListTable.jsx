@@ -1,6 +1,7 @@
-import {Col, Row, Tabs, Space, Table, Tag, Spin} from 'antd';
+import {Col, Row, Tabs, Space, Table, Tag, Spin, Button, Typography} from 'antd';
+import { Parser } from '@json2csv/plainjs';
 import React, {useEffect, useState, useContext, useMemo} from "react";
-import {useNavigate, useLocation} from "react-router-dom";
+import {useNavigate, useLocation, Link} from "react-router-dom";
 import {SmileOutlined, FrownOutlined, CheckOutlined} from "@ant-design/icons";
 import {useAtom} from "jotai";
 
@@ -82,22 +83,49 @@ export default () => {
         }
     }, [atomGlobalRun.spectra]);
 
+    const [stateTextFile, setStateTextFile] = useState(null);
+    const createTextFile = function () {
+        const parser = new Parser();
+        const csv = parser.parse(stateData);
+        // console.log(csv);
+        // const text=JSON.stringify(stateData, null, 2)
+        var data = new Blob([csv], {type: 'text/plain'});
+        if (stateTextFile !== null) {
+            window.URL.revokeObjectURL(stateTextFile);
+        }
+        const textFile = window.URL.createObjectURL(data);
+        setStateTextFile(textFile);
+    }
 
     return <>
-        <VirtualTable
-            scrollToRow={stateHighlightRow}
-            size={'small'}
-            height={500} vid={'spectra-list-table'}
-            columns={columns} dataSource={stateData}
-            rowClassName={record => {
-                return (atomGlobalSelectedScan || "").toString() === (record.key || "").toString() ? 'row-active' : '';
-            }}
-            onRow={record => ({
-                onClick: event => {
-                    console.log("record", record);
-                    setAtomGlobalSelectedScan(record.key);
-                },
-            })}
-        />
+        <Row justify="end">
+            <>
+                <Button onClick={() => {createTextFile()}}>Export results to .csv file</Button>
+                {
+                    stateTextFile ? <>
+                        <a href={stateTextFile} download="result.csv">Download</a>
+                    </> : <></>
+                }
+            </>
+        </Row>
+        <Row>
+            <Col span={24}>
+                <VirtualTable
+                    scrollToRow={stateHighlightRow}
+                    size={'small'}
+                    height={500} vid={'spectra-list-table'}
+                    columns={columns} dataSource={stateData}
+                    rowClassName={record => {
+                        return (atomGlobalSelectedScan || "").toString() === (record.key || "").toString() ? 'row-active' : '';
+                    }}
+                    onRow={record => ({
+                        onClick: event => {
+                            console.log("record", record);
+                            setAtomGlobalSelectedScan(record.key);
+                        },
+                    })}
+                />>
+            </Col>
+        </Row>
     </>;
 };
