@@ -309,6 +309,7 @@ class EntropySearch:
         # Calculate hash of file_library
         index_hash = base64.b64encode(json.dumps({
             "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
+            "version": "1.1.0"
         }).encode()).decode()[:6]
 
         # Check if the library is already indexed
