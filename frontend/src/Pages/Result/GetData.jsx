@@ -17,6 +17,8 @@ import {atomJobStatus} from "../Global/JobStatus";
 import {url} from "../Global/Config";
 
 const Main = () => {
+    const [errorNotification, contextHolderErrorNotification] = notification.useNotification();
+
     const [getAtomGlobalRun, setAtomGlobalRun] = useAtom(atomGlobalRunData);
     const [getAtomGlobalSelectedScan, setAtomGlobalSelectedScan] = useAtom(atomSelectedScan);
     const [getAtomGlobalSpectrum, setAtomGlobalSpectrum] = useAtom(atomGlobalSpectrumData);
@@ -70,6 +72,15 @@ const Main = () => {
         manual: true,
         onSuccess: (result, params) => {
             const data = result.data;
+            if(data.is_error){
+                errorNotification.error({
+                    message: 'Error',
+                    description: data.status,
+                    duration: 0,
+                    placement: "top",
+                });
+                return;
+            }
             console.log("getLibrarySpectrum", data)
             setAtomGlobalLibrary(data);
             setAtomLowerSpectrum({
@@ -92,7 +103,9 @@ const Main = () => {
     }, [getAtomGlobalSelectedScan])
 
 
-    return <></>;
+    return <>
+        {contextHolderErrorNotification}
+    </>;
 }
 
 export default Main;

@@ -109,10 +109,10 @@ const InputParameters = (showNext) => {
                                    {...formStyle2}>
                             <InputNumber min={0.0001} step={0.01}/>
                         </Form.Item>
-                        <Form.Item label={"Threads used for search"} name={"cores"}
-                                   {...formStyle2}>
-                            <IntegerInputNumber min={1} step={1}/>
-                        </Form.Item>
+                        {/*<Form.Item label={"Threads used for search"} name={"cores"}*/}
+                        {/*           {...formStyle2}>*/}
+                        {/*    <IntegerInputNumber min={1} step={1}/>*/}
+                        {/*</Form.Item>*/}
                         <Form.Item wrapperCol={{offset: 10, span: 4}}>
                             <Button type="primary" htmlType="submit">
                                 Start
