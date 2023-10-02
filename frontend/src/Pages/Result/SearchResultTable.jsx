@@ -10,6 +10,7 @@ import {
     atomLowerSpectrumData
 } from "../Global/Atoms";
 import {useRequest} from "ahooks";
+import {Parser} from "@json2csv/plainjs";
 
 const atomSearchScore = atom([]);
 const atomLibraryInfo = atom([]);
@@ -100,6 +101,20 @@ export default () => {
         }
     }, [getAtomSearchScore, stateSearchType])
 
+    const [stateTextFile, setStateTextFile] = useState(null);
+    useEffect(() => {
+        if(stateTableData && stateTableData.length > 0){
+            const parser = new Parser();
+            const csv = parser.parse(stateTableData);
+            const data = new Blob([csv], {type: 'text/plain'});
+            if (stateTextFile !== null) {
+                window.URL.revokeObjectURL(stateTextFile);
+            }
+            const textFile = window.URL.createObjectURL(data);
+            setStateTextFile(textFile);
+        }
+    },[stateTableData]);
+
     return <>
         <Row>
             <Col span={24}>
@@ -133,6 +148,15 @@ export default () => {
                     size={'small'}
                     columns={column} dataSource={stateTableData}/>
             </Col>
+        </Row>
+        <Row justify="end">
+            <>
+                {
+                    stateTextFile ? <>
+                        <Button type={"dashed"} href={stateTextFile} download="result-library_matching.csv" >Export library matching results</Button>
+                    </> : <></>
+                }
+            </>
         </Row>
     </>;
 };

@@ -56,6 +56,15 @@ const Main = () => {
         onSuccess: (result, params) => {
             const data = result.data;
             console.log("getOneSpectrum", data)
+            if(data.is_error){
+                errorNotification.error({
+                    message: 'Error',
+                    description: data.status,
+                    duration: 0,
+                    placement: "top",
+                });
+                return;
+            }
             setAtomGlobalSpectrum(data);
             setAtomUpperSpectrum({
                 precursor_mz: data.precursor_mz,
