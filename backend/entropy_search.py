@@ -256,7 +256,7 @@ class EntropySearch:
                 pass
         self.all_processes = []
 
-    def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=2):
+    def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=1):
         # Search spectra
         all_results = []
         self.status = {
