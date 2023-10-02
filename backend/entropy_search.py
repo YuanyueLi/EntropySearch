@@ -4,6 +4,8 @@ import json
 import numpy as np
 import base64
 import pickle
+import hashlib
+
 from ms_entropy import FlashEntropySearch, read_one_spectrum, standardize_spectrum
 import multiprocessing as mp
 import copy
@@ -307,10 +309,10 @@ class EntropySearch:
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
-        index_hash = base64.b64encode(json.dumps({
+        index_hash = hashlib.md5(json.dumps({
             "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
             "version": "1.1.0"
-        }).encode()).decode()[:6]
+        }).encode()).hexdigest()[:6]
 
         # Check if the library is already indexed
         if file_library.suffix == ".esi":
