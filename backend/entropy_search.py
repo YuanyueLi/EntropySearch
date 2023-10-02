@@ -391,9 +391,19 @@ class EntropySearch:
 
 
 def _parse_spectrum(spec):
+    def convert_float(x):
+        try:
+            f = float(x)
+            if np.isnan(f):
+                return -1
+            else:
+                return f
+        except:
+            return -1
+
     def convert_precursor_mz(x):
         try:
-            return float(x)
+            return convert_float(x)
         except:
             try:
                 return float(x.split()[0])
@@ -403,7 +413,7 @@ def _parse_spectrum(spec):
         "id": [["db#"], "", str],
         "scan": [["_scan_number"], -1, int],
         "name": [["title"], "", str],
-        "rt": [["retentiontime"], -1, float],
+        "rt": [["retentiontime"], -1, convert_float],
         "precursor_mz": [["precursormz", "pepmass"], -1, convert_precursor_mz],
         "ion_mode": [["ionmode"], "", str],
         "precursor_type": [["precursortype"], "", str],
@@ -446,8 +456,8 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/p/github/EntropySearch/test/inhouse_Reverse_pos.msp",
-        "file_library": r"/p/github/EntropySearch/test/inhouse_Reverse_pos.msp",
+        "file_query": r"/p/github/EntropySearch/test/a.msp",
+        "file_library": r"/p/github/EntropySearch/test/a.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         "file_output": r"/p/github/EntropySearch/test/result.csv",

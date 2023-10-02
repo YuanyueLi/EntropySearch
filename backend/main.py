@@ -33,12 +33,14 @@ search_parameters = None
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, np.integer):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, np.integer):
             return int(obj)
         elif isinstance(obj, np.floating):
             return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
+        elif np.isnan(obj):
+            return None
         elif isinstance(obj, np.bool_):
             return bool(obj)
         elif isinstance(obj, set):
@@ -47,8 +49,6 @@ class NumpyEncoder(json.JSONEncoder):
             return base64.b64encode(obj).decode("utf-8")
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
-        elif np.isnan(obj):
-            return None
         return super(NumpyEncoder, self).default(obj)
 
 
@@ -92,14 +92,11 @@ async def entropy_search(info: InfoForEntropySearch, background_tasks: Backgroun
 @app.get("/get/one_spectrum/{scan}")
 async def get_one_spectrum(scan: int):
     try:
-        return json.loads(
-            json.dumps(
-                entropy_search_worker.get_one_spectrum_result(
-                    scan, search_parameters["top_n"], search_parameters["ms1_tolerance_in_da"], search_parameters["ms2_tolerance_in_da"]
-                ),
-                cls=NumpyEncoder,
-            )
+        spectrum_result = entropy_search_worker.get_one_spectrum_result(
+            scan, search_parameters["top_n"], search_parameters["ms1_tolerance_in_da"], search_parameters["ms2_tolerance_in_da"]
         )
+        json_str = json.dumps(spectrum_result, cls=NumpyEncoder)
+        return json.loads(json_str)
     except Exception as e:
         return {"status": f"Error: {e}", "is_error": True}
 
@@ -108,7 +105,9 @@ async def get_one_spectrum(scan: int):
 @app.get("/get/one_library_spectrum/{charge}/{idx}")
 async def get_one_library_spectrum(charge: int, idx: int):
     try:
-        return json.loads(json.dumps(entropy_search_worker.get_one_library_spectrum(charge, idx), cls=NumpyEncoder))
+        spec_result = entropy_search_worker.get_one_library_spectrum(charge, idx)
+        json_str = json.dumps(spec_result, cls=NumpyEncoder)
+        return json.loads(json_str)
     except Exception as e:
         return {"status": f"Error: {e}", "is_error": True}
 
@@ -129,7 +128,8 @@ async def get_all_spectra():
             spec.pop("hybrid_search", None)
             result.append(spec)
 
-        return json.loads(json.dumps(result, cls=NumpyEncoder))
+        result_json = json.loads(json.dumps(result, cls=NumpyEncoder))
+        return result_json
     except Exception as e:
         return {"status": f"Error: {e}", "is_error": True}
 
