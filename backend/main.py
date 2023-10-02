@@ -101,7 +101,7 @@ async def get_one_spectrum(scan: int):
             )
         )
     except Exception as e:
-        return []
+        return {"status": f"Error: {e}", "is_error": True}
 
 
 # Get one library spectrum
@@ -109,8 +109,8 @@ async def get_one_spectrum(scan: int):
 async def get_one_library_spectrum(charge: int, idx: int):
     try:
         return json.loads(json.dumps(entropy_search_worker.get_one_library_spectrum(charge, idx), cls=NumpyEncoder))
-    except:
-        return []
+    except Exception as e:
+        return {"status": f"Error: {e}", "is_error": True}
 
 
 # Get all spectra
@@ -130,8 +130,8 @@ async def get_all_spectra():
             result.append(spec)
 
         return json.loads(json.dumps(result, cls=NumpyEncoder))
-    except:
-        return []
+    except Exception as e:
+        return {"status": f"Error: {e}", "is_error": True}
 
 
 # Get searching status
