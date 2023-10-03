@@ -48,6 +48,7 @@ class EntropySearch:
         spec = _parse_spectrum(spec)
         result = {
             "scan": spec["scan"],
+            "query_name": spec["name"],
             "precursor_mz": spec["precursor_mz"],
             "charge": spec["charge"],
             "rt": spec["rt"],
