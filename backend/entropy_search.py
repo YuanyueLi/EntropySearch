@@ -259,7 +259,7 @@ class EntropySearch:
                 pass
         self.all_processes = []
 
-    def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, cores=1):
+    def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=1):
         # Search spectra
         all_results = []
         self.status = {
@@ -272,14 +272,23 @@ class EntropySearch:
             try:
                 if spec.pop("_ms_level", 2) != 2:
                     continue
+                if charge is not None:
+                    spec["charge"] = charge
                 spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+                self.queue_input.put((spec,))
+                self.all_spectra.append(spec)
+                self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
 
-                result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
-                all_results.append(result)
-                # if len(all_results) > 100:
-                #     break
+                # if spec.pop("_ms_level", 2) != 2:
+                #     continue
+                # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+
+                # result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
+                # all_results.append(result)
+                # # if len(all_results) > 100:
+                # #     break
                 if spec_num % 100 == 0:
-                    self.status["message"] = f"Searching {file_query.name}... {spec_num} spectra searched"
+                    self.status["message"] = f"Reading {file_query.name}... {spec_num} spectra read"
             except Exception as e:
                 continue
 
@@ -461,14 +470,14 @@ if __name__ == '__main__':
         "cores": 1,
 
         "file_query": r"/p/github/EntropySearch/test/a.msp",
-        "file_library": r"/p/github/EntropySearch/test/a.msp",
+        "file_library": r"/p/github/EntropySearch/test/MoNA-export-All_Spectra.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         "file_output": r"/p/github/EntropySearch/test/result.csv",
     }
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
-    all_results = entropy_search.search_file(
+    all_results = entropy_search.search_file_single_core(
         Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], cores=para["cores"])
     a = 1
     # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])

@@ -74,7 +74,7 @@ def run_entropy_search(info: dict):
     global entropy_search_worker
     entropy_search_worker = EntropySearch(info["ms2_tolerance_in_da"])
     entropy_search_worker.load_spectral_library(info["file_library"])
-    entropy_search_worker.search_file(
+    entropy_search_worker.search_file_single_core(
         info["file_query"], info["top_n"], info["ms1_tolerance_in_da"], info["ms2_tolerance_in_da"], charge=info["charge"], cores=info["cores"]
     )
     print("Finish searching")
