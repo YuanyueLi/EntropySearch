@@ -276,7 +276,6 @@ class EntropySearch:
                 if charge is not None:
                     spec["charge"] = charge
                 spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
-                self.queue_input.put((spec,))
                 self.all_spectra.append(spec)
                 self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
 
@@ -284,7 +283,10 @@ class EntropySearch:
                 #     continue
                 # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
 
-                # result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
+                cur_result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
+                if cur_result is not None:
+                    spec_idx = self.scan_number_to_index[cur_result["scan"]]
+                    self.all_spectra[spec_idx].update(cur_result)
                 # all_results.append(result)
                 # # if len(all_results) > 100:
                 # #     break
