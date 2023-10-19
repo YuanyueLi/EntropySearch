@@ -2,12 +2,12 @@
 from pathlib import Path
 import json
 import numpy as np
-import base64
+# import base64
 import pickle
 import hashlib
 
 from ms_entropy import FlashEntropySearch, read_one_spectrum, standardize_spectrum
-import multiprocessing as mp
+# import multiprocessing as mp
 import copy
 
 
@@ -121,95 +121,95 @@ class EntropySearch:
 
         return spectrum_result
 
-    def search_file(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=2):
-        # Search spectra
-        all_results = []
-        file_query = Path(file_query)
-        self.status = {
-            "ready": False,
-            "running": True,
-            "error": False,
-            "message": f"Start reading {file_query.name}..."
-        }
+    # def search_file(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=2):
+    #     # Search spectra
+    #     all_results = []
+    #     file_query = Path(file_query)
+    #     self.status = {
+    #         "ready": False,
+    #         "running": True,
+    #         "error": False,
+    #         "message": f"Start reading {file_query.name}..."
+    #     }
 
-        try:
-            if charge == 0:
-                charge = None
-            if charge is not None:
-                charge = str(charge).strip()
-                if charge == "":
-                    charge = None
-            if cores > 0:
-                self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
-                queue_input_num = 0
+    #     try:
+    #         if charge == 0:
+    #             charge = None
+    #         if charge is not None:
+    #             charge = str(charge).strip()
+    #             if charge == "":
+    #                 charge = None
+    #         if cores > 0:
+    #             self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
+    #             queue_input_num = 0
 
-                self.all_processes = [
-                    mp.Process(
-                        target=worker_search_one_spectrum,
-                        args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,),
-                              self.queue_input, self.queue_output)) for _ in range(cores)]
-                for p in self.all_processes:
-                    p.start()
+    #             self.all_processes = [
+    #                 mp.Process(
+    #                     target=worker_search_one_spectrum,
+    #                     args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,),
+    #                           self.queue_input, self.queue_output)) for _ in range(cores)]
+    #             for p in self.all_processes:
+    #                 p.start()
 
-                for spec in read_one_spectrum(file_query):
-                    try:
-                        if spec.pop("_ms_level", 2) != 2:
-                            continue
-                        if charge is not None:
-                            spec["charge"] = charge
-                        spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
-                        self.queue_input.put((spec,))
-                        self.all_spectra.append(spec)
-                        self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
-                        queue_input_num += 1
-                    except Exception as e:
-                        continue
+    #             for spec in read_one_spectrum(file_query):
+    #                 try:
+    #                     if spec.pop("_ms_level", 2) != 2:
+    #                         continue
+    #                     if charge is not None:
+    #                         spec["charge"] = charge
+    #                     spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+    #                     self.queue_input.put((spec,))
+    #                     self.all_spectra.append(spec)
+    #                     self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
+    #                     queue_input_num += 1
+    #                 except Exception as e:
+    #                     continue
 
-                    if queue_input_num % 1000 == 0:
-                        self.status["message"] = f"Reading {file_query.name}... {queue_input_num} spectra read"
+    #                 if queue_input_num % 1000 == 0:
+    #                     self.status["message"] = f"Reading {file_query.name}... {queue_input_num} spectra read"
 
-                # Set ready to display results signal
-                self.status["ready"] = True
-                for _ in range(cores):
-                    self.queue_input.put(None)
+    #             # Set ready to display results signal
+    #             self.status["ready"] = True
+    #             for _ in range(cores):
+    #                 self.queue_input.put(None)
 
-                total_spec_num = queue_input_num
-                while queue_input_num > 0:
-                    cur_result = self.queue_output.get()
-                    queue_input_num -= 1
-                    # Merge results into original file
-                    if cur_result is not None:
-                        spec_idx = self.scan_number_to_index[cur_result["scan"]]
-                        self.all_spectra[spec_idx].update(cur_result)
+    #             total_spec_num = queue_input_num
+    #             while queue_input_num > 0:
+    #                 cur_result = self.queue_output.get()
+    #                 queue_input_num -= 1
+    #                 # Merge results into original file
+    #                 if cur_result is not None:
+    #                     spec_idx = self.scan_number_to_index[cur_result["scan"]]
+    #                     self.all_spectra[spec_idx].update(cur_result)
 
-                    processed_spec_num = total_spec_num - queue_input_num
-                    if processed_spec_num % 100 == 0:
-                        self.status["message"] = f"{processed_spec_num} spectra searched, about {queue_input_num} remaining"
-                        # print(f"Total: {total_spec_num}, Processed: {processed_spec_num}, Remaining: {queue_input_num}")
+    #                 processed_spec_num = total_spec_num - queue_input_num
+    #                 if processed_spec_num % 100 == 0:
+    #                     self.status["message"] = f"{processed_spec_num} spectra searched, about {queue_input_num} remaining"
+    #                     # print(f"Total: {total_spec_num}, Processed: {processed_spec_num}, Remaining: {queue_input_num}")
 
-                for p in self.all_processes:
-                    p.join()
+    #             for p in self.all_processes:
+    #                 p.join()
 
-                self.all_processes = []
+    #             self.all_processes = []
 
-            # Set success finished signal
-            self.status = {
-                "ready": True,
-                "running": False,
-                "error": False,
-                "message": f"",
-            }
-            return all_results
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            self.status = {
-                "ready": False,
-                "message": f"Error: {e}",
-                "error": True,
-                "running": False,
-            }
-            return []
+    #         # Set success finished signal
+    #         self.status = {
+    #             "ready": True,
+    #             "running": False,
+    #             "error": False,
+    #             "message": f"",
+    #         }
+    #         return all_results
+    #     except Exception as e:
+    #         import traceback
+    #         traceback.print_exc()
+    #         self.status = {
+    #             "ready": False,
+    #             "message": f"Error: {e}",
+    #             "error": True,
+    #             "running": False,
+    #         }
+    #         return []
 
     def stop(self, timeout=None):
         self.status = {
@@ -271,6 +271,8 @@ class EntropySearch:
         }
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
             try:
+                if spec_num % 100 == 0:
+                    self.status["message"] = f"Reading {file_query.name}... {spec_num} spectra read"
                 if spec.pop("_ms_level", 2) != 2:
                     continue
                 if charge is not None:
@@ -290,8 +292,6 @@ class EntropySearch:
                 # all_results.append(result)
                 # # if len(all_results) > 100:
                 # #     break
-                if spec_num % 100 == 0:
-                    self.status["message"] = f"Reading {file_query.name}... {spec_num} spectra read"
             except Exception as e:
                 continue
 
@@ -316,9 +316,9 @@ class EntropySearch:
         # Check if the library is already indexed
         self._build_spectral_library(file_library)
 
-        # Enable support for multiple cores
-        for entropy_search in self.spectral_library.values():
-            entropy_search.save_memory_for_multiprocessing()
+        # # Enable support for multiple cores
+        # for entropy_search in self.spectral_library.values():
+        #     entropy_search.save_memory_for_multiprocessing()
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
@@ -472,7 +472,7 @@ if __name__ == '__main__':
         "top_n": 10,
         "cores": 1,
 
-        "file_query": r"/p/github/EntropySearch/test/a.msp",
+        "file_query": r"/p/github/EntropySearch/test/test.mzml",
         "file_library": r"/p/github/EntropySearch/test/MoNA-export-All_Spectra.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         # "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
