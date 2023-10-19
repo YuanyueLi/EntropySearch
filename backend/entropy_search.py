@@ -379,7 +379,7 @@ class EntropySearch:
                 continue
 
         # Build index
-        self.status["message"] = f"Building index for {library_name}..."
+        self.status["message"] = f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
         for charge, spectra in spectral_library.items():
             entropy_search = FlashEntropySearch(max_ms2_tolerance_in_da=self.ms2_tolerance_in_da)
             all_library_spectra = entropy_search.build_index(all_spectra_list=spectra, min_ms2_difference_in_da=2*self.ms2_tolerance_in_da)
