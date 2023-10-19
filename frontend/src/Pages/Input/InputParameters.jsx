@@ -15,7 +15,7 @@ const InputParameters = (showNext) => {
         file_query: "",
         file_library: "",
         path_output: "/p/FastEntropySearch/gui/test/output/",
-        charge: 0,
+        charge: null,
         ms1_tolerance_in_da: 0.01,
         ms2_tolerance_in_da: 0.02,
         top_n: 100,
@@ -93,7 +93,7 @@ const InputParameters = (showNext) => {
                         {/*    <Input/>*/}
                         {/*</Form.Item>*/}
                         <Tooltip title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
-                            <Form.Item label={"Charge"} name={"charge"} {...formStyle2}>
+                            <Form.Item label={"Charge"} name={"charge"} {...formStyle2} rules={[{required: true}]}>
                                     <InputNumber min={-10} step={1}/>
                             </Form.Item>
                         </Tooltip>
