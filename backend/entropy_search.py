@@ -324,7 +324,7 @@ class EntropySearch:
         # Calculate hash of file_library
         index_hash = hashlib.md5(json.dumps({
             "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
-            "version": "1.1.0"
+            "version": "1.2.0"
         }).encode()).hexdigest()[:6]
 
         # Check if the library is already indexed

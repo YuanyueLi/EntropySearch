@@ -78,7 +78,7 @@ export default () => {
         if (atomGlobalRun.spectra) {
             const tableData = atomGlobalRun.spectra
             if (tableData) {
-                setStateData(tableData.map(d => ({...d, key: d._scan_number})));
+                setStateData(tableData.map(d => ({...d, key: d.scan})));
             }
         }
     }, [atomGlobalRun.spectra]);
