@@ -5,6 +5,7 @@ __pycache__/
 frontend/node_modules/
 .idea/
 .vscode/
+.yarn/
 test/
 py_env/
 
