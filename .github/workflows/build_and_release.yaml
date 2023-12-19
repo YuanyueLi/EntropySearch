@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Deploy with PyWebview
 
 on:
   workflow_dispatch:
@@ -49,7 +49,14 @@ jobs:
       - name: Build by Pyinstaller
         run: |
           cd new_backend
-          pyinstaller -F main.py -n flash_entropy_search.exe --add-data ../new_frontend/gui:gui -i icon.ico
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-linux --add-data ../frontend/build:gui -i icon.png
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-macos --add-data ../frontend/build:gui -i icon.icns
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-windows.exe --add-data ../frontend/build:gui -i icon.ico
+          fi
+
 
       - name: Deploy to release
         uses: softprops/action-gh-release@v1
