@@ -8,6 +8,9 @@ import multiprocessing
 import os
 import signal
 import sys
+import webview
+import threading
+from time import time
 
 import numpy as np
 import uvicorn
@@ -166,19 +169,73 @@ async def read_root():
 
 # Exit
 @app.get("/exit")
-async def exit():
+def exit():
     try:
         entropy_search_worker.exit()
     except Exception as e:
         print("Error found when exiting: ", e)
         pass
-    os.kill(os.getpid(), signal.SIGKILL)
+    os.kill(os.getpid(), signal.SIGILL)
+
+
+########################################################################################################################
+# For Webview
+def get_entrypoint():
+    def exists(path):
+        return os.path.exists(os.path.join(os.path.dirname(__file__), path))
+
+    # return "http://localhost:3000"
+
+    if exists("./gui/index.html"):
+        return "./gui/index.html"
+        
+    if exists("../frontend/build/index.html"):  # unfrozen development
+        return "../frontend/build/index.html"
+
+    # if exists("../frontend/build/index.html"):  # unfrozen development
+    #     return "../frontend/build/index.html"
+
+    if exists("../Resources/gui/index.html"):  # frozen py2app
+        return "../Resources/gui/index.html"
+
+    raise Exception("No index.html found")
+
+
+entry = get_entrypoint()
+
+
+def start_fastapi():
+    uvicorn.run(app, host="localhost", port=8711)
 
 
 if __name__ == "__main__":
-    # Modify in case of Windows and MacOS
-    if sys.platform.startswith("win") or sys.platform.startswith("darwin"):
-        # On Windows calling this function is necessary.
-        multiprocessing.freeze_support()
+    window = webview.create_window(
+        "Flash Entropy Search", entry, confirm_close=False, maximized=True, min_size=(1280, 720), resizable=True, text_select=True, zoomable=True
+    )
 
-    uvicorn.run(app, host="localhost", port=8711)
+    @app.post("/open_file_dialog")
+    def open_file_dialog(request: dict):
+        file_types = request["file_types"].split(",")
+        file_types = ";".join([f"*{x}" for x in file_types])
+        file_types = (f"Data Files ({file_types})", "All files (*.*)")
+
+        result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=file_types)
+        return {"file": result[0] if len(result) > 0 else ""}
+
+    webview.start(start_fastapi, debug=False)
+    # shutdown api thread
+    try:
+        entropy_search_worker.exit()
+    except Exception as e:
+        print("Error found when exiting: ", e)
+        pass
+    exit()
+
+
+# if __name__ == "__main__":
+#     # Modify in case of Windows and MacOS
+#     if sys.platform.startswith("win") or sys.platform.startswith("darwin"):
+#         # On Windows calling this function is necessary.
+#         multiprocessing.freeze_support()
+
+#     uvicorn.run(app, host="localhost", port=8711)

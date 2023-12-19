@@ -2,12 +2,10 @@
 from pathlib import Path
 import json
 import numpy as np
-# import base64
 import pickle
 import hashlib
 
 from ms_entropy import FlashEntropySearch, read_one_spectrum, standardize_spectrum
-# import multiprocessing as mp
 import copy
 
 
@@ -41,7 +39,7 @@ class EntropySearch:
             "ready": False,  # True means ready to display results, if error found, ready will be False.
             "running": False,  # True means searching is running, False means searching is not running.
             "error": False,  # True means error found
-            "message": ""  # Message to display
+            "message": "",  # Message to display
         }
 
     def search_one_spectrum(self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da):
@@ -53,12 +51,10 @@ class EntropySearch:
             "charge": spec["charge"],
             "rt": spec["rt"],
         }
-        if spec["precursor_mz"] <= 0 or \
-                len(spec["peaks"]) == 0 or \
-                spec["charge"] not in self.spectral_library:
+        if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec["charge"] not in self.spectral_library:
             for search_type in ["identity_search", "open_search", "neutral_loss_search", "hybrid_search"]:
                 result[search_type] = []
-                result[search_type+"-score"] = 0
+                result[search_type + "-score"] = 0
         else:
             entropy_search = self.spectral_library[spec["charge"]]
             entropy_search_result = entropy_search.search(
@@ -66,7 +62,7 @@ class EntropySearch:
                 peaks=spec["peaks"],
                 ms1_tolerance_in_da=ms1_tolerance_in_da,
                 ms2_tolerance_in_da=ms2_tolerance_in_da,
-                method="all"
+                method="all",
             )
 
             for search_type, score_array in entropy_search_result.items():
@@ -96,9 +92,9 @@ class EntropySearch:
                 result[search_type] = [[spec["scan"], i, score_array[i]] for i in top_n_idx]
 
                 if len(top_n_score) > 0:
-                    result[search_type+"-score"] = np.max(top_n_score)
+                    result[search_type + "-score"] = np.max(top_n_score)
                 else:
-                    result[search_type+"-score"] = 0
+                    result[search_type + "-score"] = 0
         return result
 
     def get_one_library_spectrum(self, charge, library_idx):
@@ -263,12 +259,7 @@ class EntropySearch:
         # Search spectra
         file_query = Path(file_query)
         all_results = []
-        self.status = {
-            "ready": False,
-            "running": True,
-            "error": False,
-            "message": f"Start reading {file_query.name}..."
-        }
+        self.status = {"ready": False, "running": True, "error": False, "message": f"Start reading {file_query.name}..."}
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
             try:
                 if spec_num % 100 == 0:
@@ -277,7 +268,7 @@ class EntropySearch:
                     continue
                 if charge is not None:
                     spec["charge"] = charge
-                spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+                spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
                 self.all_spectra.append(spec)
                 self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
 
@@ -322,10 +313,7 @@ class EntropySearch:
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
-        index_hash = hashlib.md5(json.dumps({
-            "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
-            "version": "1.2.0"
-        }).encode()).hexdigest()[:6]
+        index_hash = hashlib.md5(json.dumps({"ms2_tolerance_in_da": self.ms2_tolerance_in_da, "version": "1.2.0"}).encode()).hexdigest()[:6]
 
         # Check if the library is already indexed
         if file_library.suffix == ".esi":
@@ -352,7 +340,7 @@ class EntropySearch:
         # Read spectra
         for spec in read_one_spectrum(file_library):
             try:
-                spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+                spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
                 spec = _parse_spectrum(spec)
 
                 if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec.get("_ms_level", 2) != 2:
@@ -367,7 +355,7 @@ class EntropySearch:
                 all_spec_keys.remove("precursor_mz")
                 all_spec_keys.remove("_ms_level")
                 for k in all_spec_keys:
-                    spec["library-"+k] = spec.pop(k)
+                    spec["library-" + k] = spec.pop(k)
                 spec["library-file_name"] = library_name
 
                 spectral_library[charge].append(spec)
@@ -382,7 +370,7 @@ class EntropySearch:
         self.status["message"] = f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
         for charge, spectra in spectral_library.items():
             entropy_search = FlashEntropySearch(max_ms2_tolerance_in_da=self.ms2_tolerance_in_da)
-            all_library_spectra = entropy_search.build_index(all_spectra_list=spectra, min_ms2_difference_in_da=2*self.ms2_tolerance_in_da)
+            all_library_spectra = entropy_search.build_index(all_spectra_list=spectra, min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da)
             # Generate abstract spectra information
             all_library_spectra_abstract = []
             for spec in all_library_spectra:
@@ -391,7 +379,7 @@ class EntropySearch:
                     "precursor_mz": spec["precursor_mz"],
                     "library-name": spec["library-name"],
                     "library-precursor_type": spec["library-precursor_type"],
-                    "library-idx": len(all_library_spectra_abstract)
+                    "library-idx": len(all_library_spectra_abstract),
                 }
                 all_library_spectra_abstract.append(spec_abstract)
             entropy_search.abstract_library_spectra = all_library_spectra_abstract
@@ -425,17 +413,21 @@ def _parse_spectrum(spec):
                 return float(x.split()[0])
             except:
                 return -1
-    spec = standardize_spectrum(spec, standardize_info={
-        "id": [["db#"], "", str],
-        "scan": [["_scan_number"], -1, int],
-        "name": [["title"], "", str],
-        "rt": [["retentiontime"], -1, convert_float],
-        "precursor_mz": [["precursormz", "pepmass"], -1, convert_precursor_mz],
-        "ion_mode": [["ionmode"], "", str],
-        "precursor_type": [["precursortype"], "", str],
-        "charge": [[], "", str],
-        "name": [["title"], "", str],
-    })
+
+    spec = standardize_spectrum(
+        spec,
+        standardize_info={
+            "id": [["db#"], "", str],
+            "scan": [["_scan_number"], -1, int],
+            "name": [["title"], "", str],
+            "rt": [["retentiontime"], -1, convert_float],
+            "precursor_mz": [["precursormz", "pepmass"], -1, convert_precursor_mz],
+            "ion_mode": [["ionmode"], "", str],
+            "precursor_type": [["precursortype"], "", str],
+            "charge": [[], "", str],
+            "name": [["title"], "", str],
+        },
+    )
 
     charge = 0
     if spec["charge"]:
@@ -465,13 +457,12 @@ def _parse_spectrum(spec):
     return spec
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     para = {
         "ms1_tolerance_in_da": 0.01,
         "ms2_tolerance_in_da": 0.02,
         "top_n": 10,
         "cores": 1,
-
         "file_query": r"/p/github/EntropySearch/test/test.mzml",
         "file_library": r"/p/github/EntropySearch/test/MoNA-export-All_Spectra.msp",
         # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
@@ -481,7 +472,8 @@ if __name__ == '__main__':
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
     all_results = entropy_search.search_file_single_core(
-        Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], cores=para["cores"])
+        Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], cores=para["cores"]
+    )
     a = 1
     # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
     # print(test)

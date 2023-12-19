@@ -92,9 +92,10 @@ const InputParameters = (showNext) => {
                         {/*           rules={[{required: true}]}>*/}
                         {/*    <Input/>*/}
                         {/*</Form.Item>*/}
-                        <Tooltip title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
+                        <Tooltip
+                            title={"1 means all input spectra have charge +1, -1 means all input spectra have charge -1, 0 means auto-detection charge from input file."}>
                             <Form.Item label={"Charge"} name={"charge"} {...formStyle2} rules={[{required: true}]}>
-                                    <InputNumber min={-10} step={1}/>
+                                <InputNumber min={-10} step={1}/>
                             </Form.Item>
                         </Tooltip>
                         <Form.Item label={"Report top n hits"} name={"top_n"}
@@ -126,27 +127,18 @@ const InputParameters = (showNext) => {
 }
 
 const FileSelector = (props) => {
-    const uploadProps = {
-        multiple: false,
-        maxCount: 1,
-        showUploadList: false,
-        accept: props.fileFormat,
-        beforeUpload: (file) => {
-            if (file) {
-                if (file.path) {
-                    props.setFile(file.path)
-                } else {
-                    props.setFile(file.name)
-                }
-            }
-            return false
-        },
-    }
+    const get_file = useRequest(url.getFile, {
+        manual: true,
+        onSuccess: (result, params) => {
+            const data = result.data
+            props.setFile(data.file)
+        }
+    });
 
     return <>
-        <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined/>}>Select file</Button>
-        </Upload>
+        <Button icon={<UploadOutlined/>} onClick={() => {
+            get_file.run(props.fileFormat)
+        }}>Select file</Button>
     </>
 }
 

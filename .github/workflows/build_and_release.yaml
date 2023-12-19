@@ -47,9 +47,16 @@ jobs:
           yarn run build
 
       - name: Build by Pyinstaller
-        run: |
-          cd new_backend
-          pyinstaller -F main.py -n flash_entropy_search.exe --add-data ../new_frontend/gui:gui -i icon.ico
+        with:
+          macos: |
+            cd new_backend
+            pyinstaller -F main.py -n flash_entropy_search-macos --add-data ../frontend/build:gui -i icon.icns
+          linux: |
+            cd new_backend
+            pyinstaller -F main.py -n flash_entropy_search-linux --add-data ../frontend/build:gui -i icon.png
+          windows: |
+            cd new_backend
+            pyinstaller -F main.py -n flash_entropy_search-windows.exe --add-data ../frontend/build:gui -i icon.ico
 
       - name: Deploy to release
         uses: softprops/action-gh-release@v1
