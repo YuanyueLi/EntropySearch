@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Deploy with PyWebview
 
 on:
   workflow_dispatch:
@@ -44,8 +44,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd new_frontend
-          yarn run dist
-          ls -l dist
+          yarn run build
 
       - name: Build by Pyinstaller
         run: |
