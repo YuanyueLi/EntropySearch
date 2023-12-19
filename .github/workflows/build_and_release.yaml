@@ -1,0 +1,69 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pywebview
+    paths:
+      - 'frontend/package.json'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11, windows-latest]
+        node-version: [18.x]
+    env:
+      VERSION: ${{github.sha}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{matrix.node-version}}
+      
+      - name: Setup Yarn
+        run: npm install -g yarn
+
+      - name: Install Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          cd new_frontend
+          yarn install
+    
+      - name: Build Frontend
+        run: |
+          cd new_frontend
+          yarn run dist
+          ls -l dist
+
+      - name: Build by Pyinstaller
+        run: |
+          cd new_backend
+          pyinstaller -F main.py -n flash_entropy_search.exe --add-data ../new_frontend/gui:gui -i icon.ico
+
+      - name: Deploy to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            new_backend/dist/*
+          tag_name: ${{github.sha}}
+          name: GUI for the Flash Entropy Search
+          body: >
+            This is the GUI for the Flash Entropy Search.
+            The .msp, .mgf, .mzML, .lbm2 file formats are supported.
+            You can download the file below based on your OS.
+          draft: true
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
