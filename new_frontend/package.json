@@ -61,16 +61,13 @@
   "scripts": {
     "pack": "craco build && electron-builder --dir",
     "dist": "craco build && electron-builder",
-    "electron": "electron .",
     "start": "craco start",
-    "build": "craco build",
+    "build": "BUILD_PATH='./gui' craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "electron": "24.3.0",
-    "electron-builder": "23.6.0",
     "eslint-config-react": "^1.1.7",
     "eslint-config-react-app": "^7.0.1"
   },
