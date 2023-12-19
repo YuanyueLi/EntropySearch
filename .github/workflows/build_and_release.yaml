@@ -38,17 +38,17 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          cd new_frontend
+          cd frontend
           yarn install
     
       - name: Build Frontend
         run: |
-          cd new_frontend
+          cd frontend
           yarn run build
 
       - name: Build by Pyinstaller
         run: |
-          cd new_backend
+          cd backend
           if [ "$RUNNER_OS" == "Linux" ]; then
             pyinstaller -F main.py -n flash_entropy_search-linux --add-data ../frontend/build:gui -i icon.png
           elif [ "$RUNNER_OS" == "macOS" ]; then
@@ -62,7 +62,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            new_backend/dist/*
+            backend/dist/*
           tag_name: ${{github.sha}}
           name: GUI for the Flash Entropy Search
           body: >
