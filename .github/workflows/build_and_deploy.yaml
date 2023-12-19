@@ -1,0 +1,75 @@
+name: Build and Deploy with PyWebview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pywebview
+    paths:
+      - 'frontend/package.json'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11, windows-latest]
+        node-version: [18.x]
+    env:
+      VERSION: ${{github.sha}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{matrix.node-version}}
+      
+      - name: Setup Yarn
+        run: npm install -g yarn
+
+      - name: Install Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          cd frontend
+          yarn install
+    
+      - name: Build Frontend
+        run: |
+          cd frontend
+          yarn run build
+
+      - name: Build by Pyinstaller
+        run: |
+          cd backend
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-linux --add-data ../frontend/build:gui -i icon.png
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-macos --add-data ../frontend/build:gui -i icon.icns
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            pyinstaller -F main.py -n flash_entropy_search-windows.exe --add-data ../frontend/build:gui -i icon.ico
+          fi
+
+
+      - name: Deploy to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            backend/dist/*
+          tag_name: ${{github.sha}}
+          name: GUI for the Flash Entropy Search
+          body: >
+            This is the GUI for the Flash Entropy Search.
+            The .msp, .mgf, .mzML, .lbm2 file formats are supported.
+            You can download the file below based on your OS.
+          draft: true
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
