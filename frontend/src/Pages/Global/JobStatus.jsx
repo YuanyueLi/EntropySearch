@@ -50,7 +50,7 @@ const JobStatus = () => {
             errorNotification.info({
                 key: "jobStatus",
                 message: "Software is busy",
-                description: <Space><Spin/>Connecting to the backend...</Space>,
+                description: <><Space><Spin/>Connecting to the backend...</Space><br/>This may take up to 10 minutes for the first time startup.</>,
                 duration: 0,
                 placement: "top",
             })
