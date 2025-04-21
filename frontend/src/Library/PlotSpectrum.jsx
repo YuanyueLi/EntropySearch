@@ -156,6 +156,7 @@ const funcPlotSpectrum = (plotData) => {
         scrollZoom: true,
         displaylogo: false,
         modeBarButtonsToRemove: ['select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'zoom2d', 'pan2d'],
+        toImageButtonOptions :{format:"svg"},
     }
     return {data: data, layout: layout, config: config}
 }
