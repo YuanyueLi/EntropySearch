@@ -417,28 +417,6 @@ def _parse_spectrum(spec):
     )
 
     charge = 0
-    # if spec["charge"]:
-    #     if spec["charge"][-1] in {"+", "-"}:
-    #         c = spec["charge"][-1]
-    #         try:
-    #             charge = int(spec["charge"][:-1])
-    #             if c == "-":
-    #                 charge = -charge
-    #         except:
-    #             charge = 0
-    #     else:
-    #         try:
-    #             charge = int(spec["charge"])
-    #         except:
-    #             charge = 0
-
-    # # Infer precursor charge from ion mode
-    # if (charge == 0) and (ion_mode := spec["ion_mode"]):
-    #     charge = {"n": -1, "p": 1}.get(ion_mode[0].lower(), "")
-
-    # # Guess precursor charge from adduct
-    # if (charge == 0) and (len(spec["precursor_type"]) > 0):
-    #     charge = {"+": 1, "-": -1}.get(spec["precursor_type"][-1], "")
 
     spec["charge"] = charge
     return spec
