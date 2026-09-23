@@ -256,125 +256,24 @@ class EntropySearch:
 
     def load_spectral_library(self, file_library) -> None:
         file_library = Path(file_library)
+        if not (file_library / "group_start.pkl").exists():
+            self.status = {
+                "ready": False,
+                "running": False,
+                "error": True,
+                "message": f"{file_library} does not look like a prebuilt DynamicEntropySearch index.",
+            }
+            return
         self.status = {
             "ready": False,
             "running": True,
             "error": False,
-            "message": "Start loading spectral library...",
+            "message": f"Loading index from {file_library}...",
         }
-
-        self.status["message"] = f"Loading {file_library.name}..."
-        # Check if the library is already indexed
-        self._build_spectral_library(file_library)
-
-        # # Enable support for multiple cores
-        # for entropy_search in self.spectral_library.values():
-        #     entropy_search.save_memory_for_multiprocessing()
-
-    def _build_spectral_library(self, file_library):
-        # Calculate hash of file_library
-        index_hash = hashlib.md5(
-            json.dumps(
-                {
-                    "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
-                    "version": __VERSION__,
-                }
-            ).encode()
-        ).hexdigest()[:6]
-
-        # Check if the library is already indexed
-        if file_library.suffix == ".esi":
-            try:
-                with open(file_library, "rb") as f:
-                    self.spectral_library = pickle.load(f)
-                return True
-            except:
-                pass
-
-        # Check if the library is existed
-        file_library_index = file_library.parent / (
-            file_library.name + "." + index_hash + ".esi"
+        self.spectral_library = DynamicEntropySearch(
+            path_data=file_library, max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
         )
-        library_name = ".".join(file_library_index.stem.split(".")[:-2])
-        if file_library_index.exists():
-            try:
-                with open(file_library_index, "rb") as f:
-                    self.spectral_library = pickle.load(f)
-                return True
-            except:
-                pass
-
-        spectral_library = {0: []}
-        spectral_number = 0
-        # Read spectra
-        for spec in read_one_spectrum(file_library):
-            try:
-                # spec_raw = spec
-                spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
-                spec = _parse_spectrum(spec)
-
-                if (
-                    spec["precursor_mz"] <= 0
-                    or len(spec["peaks"]) == 0
-                    or spec.get("_ms_level", 2) != 2
-                ):
-                    continue
-
-                charge = 0
-                # if charge not in spectral_library:
-                #     spectral_library[charge] = []
-
-                all_spec_keys = list(spec.keys())
-                all_spec_keys.remove("peaks")
-                all_spec_keys.remove("precursor_mz")
-                all_spec_keys.remove("_ms_level")
-                for k in all_spec_keys:
-                    spec["library-" + k] = spec.pop(k)
-                spec["library-file_name"] = library_name
-
-                spectral_library[charge].append(spec)
-                spectral_number += 1
-
-                if spectral_number % 1000 == 0:
-                    self.status["message"] = (
-                        f"Loading {spectral_number} spectra from {library_name}..."
-                    )
-            except:
-                continue
-
-        # Build index
-        self.status["message"] = (
-            f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
-        )
-        for charge, spectra in spectral_library.items():
-            entropy_search = FlashEntropySearch(
-                max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
-            )
-            all_library_spectra = entropy_search.build_index(
-                all_spectra_list=spectra,
-                min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da,
-            )
-            # Generate abstract spectra information
-            all_library_spectra_abstract = []
-            for spec in all_library_spectra:
-                spec_abstract = {
-                    "library-id": spec.get("library-id", spec.get("library-scan", "")),
-                    "precursor_mz": spec["precursor_mz"],
-                    "library-name": spec["library-name"],
-                    "library-precursor_type": spec["library-precursor_type"],
-                    "library-idx": len(all_library_spectra_abstract),
-                }
-                all_library_spectra_abstract.append(spec_abstract)
-            entropy_search.abstract_library_spectra = all_library_spectra_abstract
-
-            spectral_library[charge] = entropy_search
-
-        self.status["message"] = f"Saving index for {library_name}..."
-        # Save index
-        with open(file_library_index, "wb") as f:
-            pickle.dump(spectral_library, f)
-        self.spectral_library = spectral_library
-        return True
+        self.status = {"ready": True, "running": False, "error": False, "message": ""}
 
 
 def _parse_spectrum(spec):
