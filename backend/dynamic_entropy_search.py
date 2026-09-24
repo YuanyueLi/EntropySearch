@@ -321,17 +321,13 @@ if __name__ == "__main__":
         "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
         "file_output": r"/p/github/EntropySearch/test/result.csv",
     }
-    entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
-    entropy_search.load_spectral_library(Path(para["file_library"]))
-    all_results = entropy_search.search_file_single_core(
+    dynamic_entropy = DynamicEntropy(para["ms2_tolerance_in_da"])
+    dynamic_entropy.load_spectral_library(Path(para["file_library"]))
+    all_results = dynamic_entropy.search_file_single_core(
         Path(para["file_query"]),
         para["top_n"],
         para["ms1_tolerance_in_da"],
         para["ms2_tolerance_in_da"],
         cores=para["cores"],
     )
-    a = 1
-    # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
-    # print(test)
-    # test2 = entropy_search.get_one_library_spectrum(charge=1, library_idx=1489)
-    # print(test2)
+    print(dynamic_entropy.all_spectra)
