@@ -97,9 +97,8 @@ class EntropySearch:
                     # Select the max score
                     max_idx = np.argmax(top_n_score)
                     # Get the library spectrum
-                    library_spec = entropy_search.abstract_library_spectra[
-                        top_n_idx[max_idx]
-                    ]
+                    library_spec = entropy_search[top_n_idx[max_idx]]
+                    print(library_spec)
                     # Assign name
                     result["name"] = library_spec["library-name"]
                     result["adduct"] = library_spec["library-precursor_type"]
@@ -139,9 +138,9 @@ class EntropySearch:
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library[
-                    spectrum_result["charge"]
-                ].abstract_library_spectra[library_idx]
+                library_spec = self.spectral_library[spectrum_result["charge"]][
+                    library_idx
+                ]
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
