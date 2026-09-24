@@ -58,7 +58,7 @@ class EntropySearch:
         if (
             spec["precursor_mz"] <= 0
             or len(spec["peaks"]) == 0
-            or spec["charge"] not in self.spectral_library
+            or self.spectral_library is None
         ):
             for search_type in [
                 "identity_search",
@@ -69,8 +69,7 @@ class EntropySearch:
                 result[search_type] = []
                 result[search_type + "-score"] = 0
         else:
-            entropy_search = self.spectral_library[spec["charge"]]
-            entropy_search_result = entropy_search.search(
+            entropy_search_result = self.spectral_library.search(
                 precursor_mz=spec["precursor_mz"],
                 peaks=spec["peaks"],
                 ms1_tolerance_in_da=ms1_tolerance_in_da,
@@ -114,8 +113,8 @@ class EntropySearch:
                     result[search_type + "-score"] = 0
         return result
 
-    def get_one_library_spectrum(self, charge, library_idx):
-        return self.spectral_library[charge][library_idx]
+    def get_one_library_spectrum(self, library_idx):
+        return self.spectral_library[library_idx]
 
     def get_one_spectrum_result(
         self, scan_number, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
@@ -139,9 +138,9 @@ class EntropySearch:
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library[
-                    spectrum_result["charge"]
-                ].abstract_library_spectra[library_idx]
+                library_spec = self.spectral_library.abstract_library_spectra[
+                    library_idx
+                ]
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
@@ -221,18 +220,12 @@ class EntropySearch:
                     )
                 if spec.pop("_ms_level", 2) != 2:
                     continue
-                spec["charge"] = 0
-                # if charge is not None:
-                #     spec["charge"] = charge
+
                 spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
                 self.all_spectra.append(spec)
                 self.scan_number_to_index[spec["_scan_number"]] = (
                     len(self.all_spectra) - 1
                 )
-
-                # if spec.pop("_ms_level", 2) != 2:
-                #     continue
-                # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
 
                 cur_result = self.search_one_spectrum(
                     spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
@@ -240,9 +233,6 @@ class EntropySearch:
                 if cur_result is not None:
                     spec_idx = self.scan_number_to_index[cur_result["scan"]]
                     self.all_spectra[spec_idx].update(cur_result)
-                # all_results.append(result)
-                # # if len(all_results) > 100:
-                # #     break
             except Exception as e:
                 continue
 
@@ -304,7 +294,7 @@ class EntropySearch:
             except:
                 pass
 
-        spectral_library = {0: []}
+        library_spectra = []
         spectral_number = 0
         # Read spectra
         for spec in read_one_spectrum(file_library):
@@ -320,10 +310,6 @@ class EntropySearch:
                 ):
                     continue
 
-                charge = 0
-                # if charge not in spectral_library:
-                #     spectral_library[charge] = []
-
                 all_spec_keys = list(spec.keys())
                 all_spec_keys.remove("peaks")
                 all_spec_keys.remove("precursor_mz")
@@ -332,7 +318,7 @@ class EntropySearch:
                     spec["library-" + k] = spec.pop(k)
                 spec["library-file_name"] = library_name
 
-                spectral_library[charge].append(spec)
+                library_spectra.append(spec)
                 spectral_number += 1
 
                 if spectral_number % 1000 == 0:
@@ -346,36 +332,34 @@ class EntropySearch:
         self.status["message"] = (
             f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
         )
-        for charge, spectra in spectral_library.items():
-            entropy_search = FlashEntropySearch(
-                max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
-            )
-            all_library_spectra = entropy_search.build_index(
-                all_spectra_list=spectra,
-                min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da,
-            )
-            # Generate abstract spectra information
-            all_library_spectra_abstract = []
-            for spec in all_library_spectra:
-                print(spec)
-                spec_abstract = {
-                    "library-id": spec.get("library-id", spec.get("library-scan", "")),
-                    "precursor_mz": spec["precursor_mz"],
-                    "library-name": spec["library-name"],
-                    "library-precursor_type": spec["library-precursor_type"],
-                    "library-idx": len(all_library_spectra_abstract),
-                }
-                print(spec_abstract)
-                all_library_spectra_abstract.append(spec_abstract)
-            entropy_search.abstract_library_spectra = all_library_spectra_abstract
+        entropy_search = FlashEntropySearch(
+            max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
+        )
+        all_library_spectra = entropy_search.build_index(
+            all_spectra_list=library_spectra,
+            min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da,
+        )
+        # Generate abstract spectra information
+        all_library_spectra_abstract = []
+        for spec in all_library_spectra:
+            print(spec)
+            spec_abstract = {
+                "library-id": spec.get("library-id", spec.get("library-scan", "")),
+                "precursor_mz": spec["precursor_mz"],
+                "library-name": spec["library-name"],
+                "library-precursor_type": spec["library-precursor_type"],
+                "library-idx": len(all_library_spectra_abstract),
+            }
+            print(spec_abstract)
+            all_library_spectra_abstract.append(spec_abstract)
+        entropy_search.abstract_library_spectra = all_library_spectra_abstract
 
-            spectral_library[charge] = entropy_search
+        self.spectral_library = entropy_search
 
         self.status["message"] = f"Saving index for {library_name}..."
         # Save index
         with open(file_library_index, "wb") as f:
-            pickle.dump(spectral_library, f)
-        self.spectral_library = spectral_library
+            pickle.dump(self.spectral_library, f)
         return True
 
 
@@ -417,10 +401,6 @@ def _parse_spectrum(spec):
             "name": [["title"], "", str],
         },
     )
-
-    charge = 0
-
-    spec["charge"] = charge
     return spec
 
 
