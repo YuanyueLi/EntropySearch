@@ -214,37 +214,33 @@ class EntropySearch:
             "message": f"Start reading {file_query.name}...",
         }
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
-            try:
-                if spec_num % 100 == 0:
-                    self.status["message"] = (
-                        f"Reading {file_query.name}... {spec_num} spectra read"
-                    )
-                if spec.pop("_ms_level", 2) != 2:
-                    continue
-                spec["charge"] = 0
-                # if charge is not None:
-                #     spec["charge"] = charge
-                spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
-                self.all_spectra.append(spec)
-                self.scan_number_to_index[spec["_scan_number"]] = (
-                    len(self.all_spectra) - 1
+            if spec_num % 100 == 0:
+                self.status["message"] = (
+                    f"Reading {file_query.name}... {spec_num} spectra read"
                 )
-
-                # if spec.pop("_ms_level", 2) != 2:
-                #     continue
-                # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
-
-                cur_result = self.search_one_spectrum(
-                    spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
-                )
-                if cur_result is not None:
-                    spec_idx = self.scan_number_to_index[cur_result["scan"]]
-                    self.all_spectra[spec_idx].update(cur_result)
-                # all_results.append(result)
-                # # if len(all_results) > 100:
-                # #     break
-            except Exception as e:
+                print(f"Reading {file_query.name}... {spec_num} spectra read")
+            if spec.pop("_ms_level", 2) != 2:
                 continue
+            spec["charge"] = 0
+            # if charge is not None:
+            #     spec["charge"] = charge
+            spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
+            self.all_spectra.append(spec)
+            self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
+
+            # if spec.pop("_ms_level", 2) != 2:
+            #     continue
+            # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
+
+            cur_result = self.search_one_spectrum(
+                spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+            )
+            if cur_result is not None:
+                spec_idx = self.scan_number_to_index[cur_result["scan"]]
+                self.all_spectra[spec_idx].update(cur_result)
+            # all_results.append(result)
+            # # if len(all_results) > 100:
+            # #     break
 
         self.status = {
             "ready": True,
