@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import copy
-import hashlib
-import json
-import pickle
 from pathlib import Path
 
 import numpy as np
-from ms_entropy import FlashEntropySearch, read_one_spectrum, standardize_spectrum
+from ms_entropy import (
+    DynamicEntropySearch,
+    read_one_spectrum,
+    standardize_spectrum,
+)
 
 __VERSION__ = "2.0.0"
 
@@ -21,7 +22,7 @@ def worker_search_one_spectrum(function, parameters_global, queue_input, queue_o
             queue_output.put(None)
 
 
-class EntropySearch:
+class DynamicEntropy:
     def __init__(self, ms2_tolerance_in_da) -> None:
         self.ms2_tolerance_in_da = ms2_tolerance_in_da
         self.spectral_library = None
@@ -77,7 +78,6 @@ class EntropySearch:
                 ms2_tolerance_in_da=ms2_tolerance_in_da,
                 method="all",
             )
-
             for search_type, score_array in entropy_search_result.items():
                 # Select top N results
                 if top_n < len(score_array):
