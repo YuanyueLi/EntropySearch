@@ -56,11 +56,7 @@ class DynamicEntropy:
             "charge": spec["charge"],
             "rt": spec["rt"],
         }
-        if (
-            spec["precursor_mz"] <= 0
-            or len(spec["peaks"]) == 0
-            or spec["charge"] not in self.spectral_library
-        ):
+        if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0:
             for search_type in [
                 "identity_search",
                 "open_search",
@@ -70,8 +66,7 @@ class DynamicEntropy:
                 result[search_type] = []
                 result[search_type + "-score"] = 0
         else:
-            entropy_search = self.spectral_library[spec["charge"]]
-            entropy_search_result = entropy_search.search(
+            entropy_search_result = self.spectral_library.search(
                 precursor_mz=spec["precursor_mz"],
                 peaks=spec["peaks"],
                 ms1_tolerance_in_da=ms1_tolerance_in_da,
@@ -97,7 +92,7 @@ class DynamicEntropy:
                     # Select the max score
                     max_idx = np.argmax(top_n_score)
                     # Get the library spectrum
-                    library_spec = entropy_search[top_n_idx[max_idx]]
+                    library_spec = self.spectral_library[top_n_idx[max_idx]]
                     print(library_spec)
                     # Assign name
                     result["name"] = library_spec["library-name"]
@@ -114,7 +109,7 @@ class DynamicEntropy:
         return result
 
     def get_one_library_spectrum(self, charge, library_idx):
-        return self.spectral_library[charge][library_idx]
+        return self.spectral_library[library_idx]
 
     def get_one_spectrum_result(
         self, scan_number, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
@@ -138,9 +133,7 @@ class DynamicEntropy:
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library[spectrum_result["charge"]][
-                    library_idx
-                ]
+                library_spec = self.spectral_library[library_idx]
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
