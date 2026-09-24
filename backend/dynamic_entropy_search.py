@@ -93,10 +93,10 @@ class DynamicEntropy:
                     max_idx = np.argmax(top_n_score)
                     # Get the library spectrum
                     library_spec = self.spectral_library[top_n_idx[max_idx]]
-                    print(library_spec)
-                    # Assign name
-                    result["name"] = library_spec["library-name"]
-                    result["adduct"] = library_spec["library-precursor_type"]
+
+                    # result["rtinseconds"] = library_spec["rtinseconds"]
+                    # result["samplename"] = library_spec["samplename"]
+                    # result["collisionenergy"] = library_spec["collisionenergy"]
 
                 result[search_type] = [
                     [spec["scan"], i, score_array[i]] for i in top_n_idx
