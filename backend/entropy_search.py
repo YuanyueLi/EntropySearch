@@ -44,7 +44,9 @@ class EntropySearch:
             "message": "",  # Message to display
         }
 
-    def search_one_spectrum(self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da):
+    def search_one_spectrum(
+        self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+    ):
         spec = _parse_spectrum(spec)
         result = {
             "scan": spec["scan"],
@@ -53,8 +55,17 @@ class EntropySearch:
             "charge": spec["charge"],
             "rt": spec["rt"],
         }
-        if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec["charge"] not in self.spectral_library:
-            for search_type in ["identity_search", "open_search", "neutral_loss_search", "hybrid_search"]:
+        if (
+            spec["precursor_mz"] <= 0
+            or len(spec["peaks"]) == 0
+            or spec["charge"] not in self.spectral_library
+        ):
+            for search_type in [
+                "identity_search",
+                "open_search",
+                "neutral_loss_search",
+                "hybrid_search",
+            ]:
                 result[search_type] = []
                 result[search_type + "-score"] = 0
         else:
@@ -86,12 +97,16 @@ class EntropySearch:
                     # Select the max score
                     max_idx = np.argmax(top_n_score)
                     # Get the library spectrum
-                    library_spec = entropy_search.abstract_library_spectra[top_n_idx[max_idx]]
+                    library_spec = entropy_search.abstract_library_spectra[
+                        top_n_idx[max_idx]
+                    ]
                     # Assign name
                     result["name"] = library_spec["library-name"]
                     result["adduct"] = library_spec["library-precursor_type"]
 
-                result[search_type] = [[spec["scan"], i, score_array[i]] for i in top_n_idx]
+                result[search_type] = [
+                    [spec["scan"], i, score_array[i]] for i in top_n_idx
+                ]
 
                 if len(top_n_score) > 0:
                     result[search_type + "-score"] = np.max(top_n_score)
@@ -102,112 +117,35 @@ class EntropySearch:
     def get_one_library_spectrum(self, charge, library_idx):
         return self.spectral_library[charge][library_idx]
 
-    def get_one_spectrum_result(self, scan_number, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da):
+    def get_one_spectrum_result(
+        self, scan_number, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+    ):
         spec_idx = self.scan_number_to_index[scan_number]
         spectrum_result = None
         spectrum_result = copy.copy(self.all_spectra[spec_idx])
         if self.status["running"]:
-            spectrum_result.update(self.search_one_spectrum(spectrum_result, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da))
+            spectrum_result.update(
+                self.search_one_spectrum(
+                    spectrum_result, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+                )
+            )
 
-        search_type_keys = ["identity_search", "open_search", "neutral_loss_search", "hybrid_search"]
+        search_type_keys = [
+            "identity_search",
+            "open_search",
+            "neutral_loss_search",
+            "hybrid_search",
+        ]
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library[spectrum_result["charge"]].abstract_library_spectra[library_idx]
+                library_spec = self.spectral_library[
+                    spectrum_result["charge"]
+                ].abstract_library_spectra[library_idx]
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
         return spectrum_result
-
-    # def search_file(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=2):
-    #     # Search spectra
-    #     all_results = []
-    #     file_query = Path(file_query)
-    #     self.status = {
-    #         "ready": False,
-    #         "running": True,
-    #         "error": False,
-    #         "message": f"Start reading {file_query.name}..."
-    #     }
-
-    #     try:
-    #         if charge == 0:
-    #             charge = None
-    #         if charge is not None:
-    #             charge = str(charge).strip()
-    #             if charge == "":
-    #                 charge = None
-    #         if cores > 0:
-    #             self.queue_input, self.queue_output = mp.Queue(), mp.Queue()
-    #             queue_input_num = 0
-
-    #             self.all_processes = [
-    #                 mp.Process(
-    #                     target=worker_search_one_spectrum,
-    #                     args=(self.search_one_spectrum, (top_n, ms1_tolerance_in_da, ms2_tolerance_in_da,),
-    #                           self.queue_input, self.queue_output)) for _ in range(cores)]
-    #             for p in self.all_processes:
-    #                 p.start()
-
-    #             for spec in read_one_spectrum(file_query):
-    #                 try:
-    #                     if spec.pop("_ms_level", 2) != 2:
-    #                         continue
-    #                     if charge is not None:
-    #                         spec["charge"] = charge
-    #                     spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
-    #                     self.queue_input.put((spec,))
-    #                     self.all_spectra.append(spec)
-    #                     self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
-    #                     queue_input_num += 1
-    #                 except Exception as e:
-    #                     continue
-
-    #                 if queue_input_num % 1000 == 0:
-    #                     self.status["message"] = f"Reading {file_query.name}... {queue_input_num} spectra read"
-
-    #             # Set ready to display results signal
-    #             self.status["ready"] = True
-    #             for _ in range(cores):
-    #                 self.queue_input.put(None)
-
-    #             total_spec_num = queue_input_num
-    #             while queue_input_num > 0:
-    #                 cur_result = self.queue_output.get()
-    #                 queue_input_num -= 1
-    #                 # Merge results into original file
-    #                 if cur_result is not None:
-    #                     spec_idx = self.scan_number_to_index[cur_result["scan"]]
-    #                     self.all_spectra[spec_idx].update(cur_result)
-
-    #                 processed_spec_num = total_spec_num - queue_input_num
-    #                 if processed_spec_num % 100 == 0:
-    #                     self.status["message"] = f"{processed_spec_num} spectra searched, about {queue_input_num} remaining"
-    #                     # print(f"Total: {total_spec_num}, Processed: {processed_spec_num}, Remaining: {queue_input_num}")
-
-    #             for p in self.all_processes:
-    #                 p.join()
-
-    #             self.all_processes = []
-
-    #         # Set success finished signal
-    #         self.status = {
-    #             "ready": True,
-    #             "running": False,
-    #             "error": False,
-    #             "message": f"",
-    #         }
-    #         return all_results
-    #     except Exception as e:
-    #         import traceback
-    #         traceback.print_exc()
-    #         self.status = {
-    #             "ready": False,
-    #             "message": f"Error: {e}",
-    #             "error": True,
-    #             "running": False,
-    #         }
-    #         return []
 
     def stop(self, timeout=None):
         self.status = {
@@ -257,15 +195,30 @@ class EntropySearch:
                 pass
         self.all_processes = []
 
-    def search_file_single_core(self, file_query, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, charge=None, cores=1):
+    def search_file_single_core(
+        self,
+        file_query,
+        top_n,
+        ms1_tolerance_in_da,
+        ms2_tolerance_in_da,
+        charge=None,
+        cores=1,
+    ):
         # Search spectra
         file_query = Path(file_query)
         all_results = []
-        self.status = {"ready": False, "running": True, "error": False, "message": f"Start reading {file_query.name}..."}
+        self.status = {
+            "ready": False,
+            "running": True,
+            "error": False,
+            "message": f"Start reading {file_query.name}...",
+        }
         for spec_num, spec in enumerate(read_one_spectrum(file_query)):
             try:
                 if spec_num % 100 == 0:
-                    self.status["message"] = f"Reading {file_query.name}... {spec_num} spectra read"
+                    self.status["message"] = (
+                        f"Reading {file_query.name}... {spec_num} spectra read"
+                    )
                 if spec.pop("_ms_level", 2) != 2:
                     continue
                 spec["charge"] = 0
@@ -273,13 +226,17 @@ class EntropySearch:
                 #     spec["charge"] = charge
                 spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
                 self.all_spectra.append(spec)
-                self.scan_number_to_index[spec["_scan_number"]] = len(self.all_spectra) - 1
+                self.scan_number_to_index[spec["_scan_number"]] = (
+                    len(self.all_spectra) - 1
+                )
 
                 # if spec.pop("_ms_level", 2) != 2:
                 #     continue
                 # spec['peaks'] = np.array(spec['peaks']).astype(np.float32)
 
-                cur_result = self.search_one_spectrum(spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da)
+                cur_result = self.search_one_spectrum(
+                    spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+                )
                 if cur_result is not None:
                     spec_idx = self.scan_number_to_index[cur_result["scan"]]
                     self.all_spectra[spec_idx].update(cur_result)
@@ -316,7 +273,14 @@ class EntropySearch:
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
-        index_hash = hashlib.md5(json.dumps({"ms2_tolerance_in_da": self.ms2_tolerance_in_da, "version": __VERSION__}).encode()).hexdigest()[:6]
+        index_hash = hashlib.md5(
+            json.dumps(
+                {
+                    "ms2_tolerance_in_da": self.ms2_tolerance_in_da,
+                    "version": __VERSION__,
+                }
+            ).encode()
+        ).hexdigest()[:6]
 
         # Check if the library is already indexed
         if file_library.suffix == ".esi":
@@ -328,7 +292,9 @@ class EntropySearch:
                 pass
 
         # Check if the library is existed
-        file_library_index = file_library.parent / (file_library.name + "." + index_hash + ".esi")
+        file_library_index = file_library.parent / (
+            file_library.name + "." + index_hash + ".esi"
+        )
         library_name = ".".join(file_library_index.stem.split(".")[:-2])
         if file_library_index.exists():
             try:
@@ -347,7 +313,11 @@ class EntropySearch:
                 spec["peaks"] = np.array(spec["peaks"]).astype(np.float32)
                 spec = _parse_spectrum(spec)
 
-                if spec["precursor_mz"] <= 0 or len(spec["peaks"]) == 0 or spec.get("_ms_level", 2) != 2:
+                if (
+                    spec["precursor_mz"] <= 0
+                    or len(spec["peaks"]) == 0
+                    or spec.get("_ms_level", 2) != 2
+                ):
                     continue
 
                 charge = 0
@@ -366,18 +336,28 @@ class EntropySearch:
                 spectral_number += 1
 
                 if spectral_number % 1000 == 0:
-                    self.status["message"] = f"Loading {spectral_number} spectra from {library_name}..."
+                    self.status["message"] = (
+                        f"Loading {spectral_number} spectra from {library_name}..."
+                    )
             except:
                 continue
 
         # Build index
-        self.status["message"] = f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
+        self.status["message"] = (
+            f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
+        )
         for charge, spectra in spectral_library.items():
-            entropy_search = FlashEntropySearch(max_ms2_tolerance_in_da=self.ms2_tolerance_in_da)
-            all_library_spectra = entropy_search.build_index(all_spectra_list=spectra, min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da)
+            entropy_search = FlashEntropySearch(
+                max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
+            )
+            all_library_spectra = entropy_search.build_index(
+                all_spectra_list=spectra,
+                min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da,
+            )
             # Generate abstract spectra information
             all_library_spectra_abstract = []
             for spec in all_library_spectra:
+                print(spec)
                 spec_abstract = {
                     "library-id": spec.get("library-id", spec.get("library-scan", "")),
                     "precursor_mz": spec["precursor_mz"],
@@ -385,6 +365,7 @@ class EntropySearch:
                     "library-precursor_type": spec["library-precursor_type"],
                     "library-idx": len(all_library_spectra_abstract),
                 }
+                print(spec_abstract)
                 all_library_spectra_abstract.append(spec_abstract)
             entropy_search.abstract_library_spectra = all_library_spectra_abstract
 
@@ -438,28 +419,6 @@ def _parse_spectrum(spec):
     )
 
     charge = 0
-    # if spec["charge"]:
-    #     if spec["charge"][-1] in {"+", "-"}:
-    #         c = spec["charge"][-1]
-    #         try:
-    #             charge = int(spec["charge"][:-1])
-    #             if c == "-":
-    #                 charge = -charge
-    #         except:
-    #             charge = 0
-    #     else:
-    #         try:
-    #             charge = int(spec["charge"])
-    #         except:
-    #             charge = 0
-
-    # # Infer precursor charge from ion mode
-    # if (charge == 0) and (ion_mode := spec["ion_mode"]):
-    #     charge = {"n": -1, "p": 1}.get(ion_mode[0].lower(), "")
-
-    # # Guess precursor charge from adduct
-    # if (charge == 0) and (len(spec["precursor_type"]) > 0):
-    #     charge = {"+": 1, "-": -1}.get(spec["precursor_type"][-1], "")
 
     spec["charge"] = charge
     return spec
@@ -480,7 +439,11 @@ if __name__ == "__main__":
     entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
     entropy_search.load_spectral_library(Path(para["file_library"]))
     all_results = entropy_search.search_file_single_core(
-        Path(para["file_query"]), para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"], cores=para["cores"]
+        Path(para["file_query"]),
+        para["top_n"],
+        para["ms1_tolerance_in_da"],
+        para["ms2_tolerance_in_da"],
+        cores=para["cores"],
     )
     a = 1
     # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
