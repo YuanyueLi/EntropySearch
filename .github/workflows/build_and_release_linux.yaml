@@ -15,15 +15,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18.x]
+        node-version: [24.x]
     env:
       VERSION: ${{github.sha}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v7
         with:
           node-version: ${{matrix.node-version}}
       
@@ -31,7 +31,7 @@ jobs:
         run: npm install -g yarn
 
       - name: Install Python 3
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v7
         with:
           python-version: "3.9"
 
@@ -53,7 +53,7 @@ jobs:
           ls -l dist
 
       - name: Deploy to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             frontend/dist/EntropySearch*.AppImage
