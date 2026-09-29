@@ -96,9 +96,7 @@ class EntropySearch:
                     # Select the max score
                     max_idx = np.argmax(top_n_score)
                     # Get the library spectrum
-                    library_spec = entropy_search.abstract_library_spectra[
-                        top_n_idx[max_idx]
-                    ]
+                    library_spec = self.spectral_library[top_n_idx[max_idx]]
                     # Assign name
                     result["name"] = library_spec["library-name"]
                     result["adduct"] = library_spec["library-precursor_type"]
@@ -138,9 +136,7 @@ class EntropySearch:
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library.abstract_library_spectra[
-                    library_idx
-                ]
+                library_spec = self.spectral_library[library_idx]
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
@@ -293,7 +289,7 @@ class EntropySearch:
                 return True
             except:
                 pass
-
+        # todo make separate function
         library_spectra = []
         spectral_number = 0
         # Read spectra
@@ -332,30 +328,13 @@ class EntropySearch:
         self.status["message"] = (
             f"Building index for {library_name}, this may take up to 10 minutes depending on the size of the library..."
         )
-        entropy_search = FlashEntropySearch(
+        self.spectral_library = FlashEntropySearch(
             max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
         )
-        all_library_spectra = entropy_search.build_index(
+        self.spectral_library.build_index(
             all_spectra_list=library_spectra,
             min_ms2_difference_in_da=2 * self.ms2_tolerance_in_da,
         )
-        # Generate abstract spectra information
-        all_library_spectra_abstract = []
-        for spec in all_library_spectra:
-            print(spec)
-            spec_abstract = {
-                "library-id": spec.get("library-id", spec.get("library-scan", "")),
-                "precursor_mz": spec["precursor_mz"],
-                "library-name": spec["library-name"],
-                "library-precursor_type": spec["library-precursor_type"],
-                "library-idx": len(all_library_spectra_abstract),
-            }
-            print(spec_abstract)
-            all_library_spectra_abstract.append(spec_abstract)
-        entropy_search.abstract_library_spectra = all_library_spectra_abstract
-
-        self.spectral_library = entropy_search
-
         self.status["message"] = f"Saving index for {library_name}..."
         # Save index
         with open(file_library_index, "wb") as f:
@@ -410,23 +389,16 @@ if __name__ == "__main__":
         "ms2_tolerance_in_da": 0.02,
         "top_n": 10,
         "cores": 1,
-        "file_query": r"/p/github/EntropySearch/test/test_2.mzML",
-        # "file_library": r"/p/github/EntropySearch/test/MoNA-export-All_Spectra.msp",
-        # "file_query": r"/p/FastEntropySearch/gui/test/input/test.mgf",
-        "file_library": r"/p/FastEntropySearch/gui/test/input/test.mgf",
-        "file_output": r"/p/github/EntropySearch/test/result.csv",
+        "file_query": r"C:\Users\jonge094\Repos\kb_aihrms\data\example_files\DDA_and_DIA\a_few_spectra.mgf",
+        "file_library": r"C:\Users\jonge094\Repos\kb_aihrms\data\example_files\DDA_and_DIA\a_few_spectra.mgf",
     }
-    entropy_search = EntropySearch(para["ms2_tolerance_in_da"])
-    entropy_search.load_spectral_library(Path(para["file_library"]))
-    all_results = entropy_search.search_file_single_core(
+    dynamic_entropy = EntropySearch(para["ms2_tolerance_in_da"])
+    dynamic_entropy.load_spectral_library(Path(para["file_library"]))
+    all_results = dynamic_entropy.search_file_single_core(
         Path(para["file_query"]),
         para["top_n"],
         para["ms1_tolerance_in_da"],
         para["ms2_tolerance_in_da"],
         cores=para["cores"],
     )
-    a = 1
-    # test = entropy_search.get_one_spectrum_result(5, para["top_n"], para["ms1_tolerance_in_da"], para["ms2_tolerance_in_da"])
-    # print(test)
-    # test2 = entropy_search.get_one_library_spectrum(charge=1, library_idx=1489)
-    # print(test2)
+    print(dynamic_entropy.all_spectra)
