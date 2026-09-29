@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-import asyncio
 import base64
 import copy
 import datetime
 import json
 import multiprocessing
 import os
-from pathlib import Path
 import signal
 import sys
 
 import numpy as np
 import uvicorn
 from entropy_search import EntropySearch
-from dynamic_entropy_search import DynamicEntropy
-from fastapi import BackgroundTasks, Depends, FastAPI
+from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -74,10 +71,7 @@ def run_entropy_search(info: dict):
     search_parameters = info.copy()
     print("Start searching")
     global entropy_search_worker
-    if (Path(info["file_library"]) / "group_start.pkl").exists():
-        entropy_search_worker = DynamicEntropy(info["ms2_tolerance_in_da"])
-    else:
-        entropy_search_worker = EntropySearch(info["ms2_tolerance_in_da"])
+    entropy_search_worker = EntropySearch(info["ms2_tolerance_in_da"])
     entropy_search_worker.load_spectral_library(info["file_library"])
     entropy_search_worker.search_file_single_core(
         info["file_query"],
@@ -118,7 +112,7 @@ async def get_one_spectrum(scan: int):
 @app.get("/get/one_library_spectrum/{charge}/{idx}")
 async def get_one_library_spectrum(charge: int, idx: int):
     try:
-        spec_result = entropy_search_worker.get_one_library_spectrum(charge, idx)
+        spec_result = entropy_search_worker.get_one_library_spectrum(idx)
         json_str = json.dumps(spec_result, cls=NumpyEncoder)
         return json.loads(json_str)
     except Exception as e:

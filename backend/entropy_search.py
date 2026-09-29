@@ -6,7 +6,12 @@ import pickle
 from pathlib import Path
 
 import numpy as np
-from ms_entropy import FlashEntropySearch, read_one_spectrum, standardize_spectrum
+from ms_entropy import (
+    DynamicEntropySearch,
+    FlashEntropySearch,
+    read_one_spectrum,
+    standardize_spectrum,
+)
 
 __VERSION__ = "2.0.0"
 
@@ -248,14 +253,14 @@ class EntropySearch:
             "error": False,
             "message": "Start loading spectral library...",
         }
-
-        self.status["message"] = f"Loading {file_library.name}..."
-        # Check if the library is already indexed
-        self._build_spectral_library(file_library)
-
-        # # Enable support for multiple cores
-        # for entropy_search in self.spectral_library.values():
-        #     entropy_search.save_memory_for_multiprocessing()
+        if (file_library / "group_start.pkl").exists():
+            self.spectral_library = DynamicEntropySearch(
+                path_data=file_library, max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
+            )
+        else:
+            self.status["message"] = f"Loading {file_library.name}..."
+            # Check if the library is already indexed
+            self._build_spectral_library(file_library)
 
     def _build_spectral_library(self, file_library):
         # Calculate hash of file_library
