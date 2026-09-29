@@ -98,8 +98,8 @@ class EntropySearch:
                     # Get the library spectrum
                     library_spec = self.spectral_library[top_n_idx[max_idx]]
                     # Assign name
-                    result["name"] = library_spec["library-name"]
-                    result["adduct"] = library_spec["library-precursor_type"]
+                    result["name"] = library_spec.get("library-name", "")
+                    result["adduct"] = library_spec.get("library-precursor_type", "")
 
                 result[search_type] = [
                     [spec["scan"], i, score_array[i]] for i in top_n_idx
