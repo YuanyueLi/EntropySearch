@@ -377,7 +377,7 @@ def _parse_spectrum(spec):
             "id": [["db#"], "", str],
             "scan": [["_scan_number"], -1, int],
             "name": [["title"], "", str],
-            "rt": [["retentiontime"], -1, convert_float],
+            "rt": [["retentiontime", "RTINSECONDS", "rtinseconds"], -1, convert_float],
             "precursor_mz": [["precursormz", "pepmass"], -1, convert_precursor_mz],
             "ion_mode": [["ionmode"], "", str],
             "precursor_type": [["precursortype"], "", str],
