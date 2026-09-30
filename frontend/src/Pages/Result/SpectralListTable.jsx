@@ -1,13 +1,13 @@
-import {Col, Row, Tabs, Space, Table, Tag, Spin, Button, Typography} from 'antd';
+import { Col, Row, Tabs, Space, Table, Tag, Spin, Button, Typography } from 'antd';
 import { Parser } from '@json2csv/plainjs';
-import React, {useEffect, useState, useContext, useMemo} from "react";
-import {useNavigate, useLocation, Link} from "react-router-dom";
-import {SmileOutlined, FrownOutlined, CheckOutlined} from "@ant-design/icons";
-import {useAtom} from "jotai";
+import React, { useEffect, useState, useContext, useMemo } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { SmileOutlined, FrownOutlined, CheckOutlined } from "@ant-design/icons";
+import { useAtom } from "jotai";
 
 import VirtualTable from "../../Library/VirtualTable";
-import {useRequest} from "ahooks";
-import {atomGlobalRunData, atomSelectedScan, atomGlobalSpectrumData} from "../Global/Atoms";
+import { useRequest } from "ahooks";
+import { atomGlobalRunData, atomSelectedScan, atomGlobalSpectrumData } from "../Global/Atoms";
 
 const columnsTemplate = [
     {
@@ -29,7 +29,7 @@ const columnsTemplate = [
     }, {
         title: "RT",
         dataIndex: "rt",
-        render: (_, record) => (record.rt === undefined ? -1 : record.rt).toFixed(1),
+        render: (_, record) => (record.rt === undefined ? -1 : record.rt).toFixed(3),
         width: 50,
     }, {
         title: "Precursor m/z",
@@ -57,7 +57,7 @@ const columnsTemplate = [
 const columns = columnsTemplate.map(k => ({
     key: k.dataIndex,
     ellipsis: true,
-    render: (_, record) => record[k.dataIndex] === undefined ? <Spin/> : record[k.dataIndex].toFixed(3),
+    render: (_, record) => record[k.dataIndex] === undefined ? <Spin /> : record[k.dataIndex].toFixed(3),
     sorter: (a, b) => (a[k.dataIndex] ?? -1) - (b[k.dataIndex] ?? -1),
     ...k
 }));
@@ -78,24 +78,24 @@ export default () => {
         if (atomGlobalRun.spectra) {
             const tableData = atomGlobalRun.spectra
             if (tableData) {
-                setStateData(tableData.map(d => ({...d, key: d.scan})));
+                setStateData(tableData.map(d => ({ ...d, key: d.scan })));
             }
         }
     }, [atomGlobalRun.spectra]);
 
     const [stateTextFile, setStateTextFile] = useState(null);
     useEffect(() => {
-        if(stateData && stateData.length > 0){
+        if (stateData && stateData.length > 0) {
             const parser = new Parser();
             const csv = parser.parse(stateData);
-            const data = new Blob([csv], {type: 'text/plain'});
+            const data = new Blob([csv], { type: 'text/plain' });
             if (stateTextFile !== null) {
                 window.URL.revokeObjectURL(stateTextFile);
             }
             const textFile = window.URL.createObjectURL(data);
             setStateTextFile(textFile);
         }
-    },[stateData]);
+    }, [stateData]);
 
     return <>
         <Row justify="end">
@@ -123,7 +123,7 @@ export default () => {
                             setAtomGlobalSelectedScan(record.key);
                         },
                     })}
-                />>
+                />
             </Col>
         </Row>
     </>;
