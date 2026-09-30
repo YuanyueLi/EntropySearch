@@ -17,7 +17,7 @@ const atomLibraryInfo = atom([]);
 
 // Fields that already have a dedicated fixed column, so we don't offer
 // them again in the "extra metadata" picker.
-const FIXED_FIELDS = ["library-id", "library-name", "library-precursor_type", "precursor_mz", "library-idx"];
+const FIXED_FIELDS = ["precursor_mz"];
 
 export default () => {
     const [getAtomGlobalSpectrum,] = useAtom(atomGlobalSpectrumData);
@@ -57,18 +57,12 @@ export default () => {
         return Array.from(fieldSet).sort();
     }, [getAtomSearchScore, stateSearchType]);
 
-    const [stateSelectedFields, setStateSelectedFields] = useState([]);
+    const [stateSelectedFields, setStateSelectedFields] = useState(["library-id", "library-name", "library-precursor_type", "library-idx"]);
 
     ////////////////////////////////////////////////////////////////////////////////
     // Table columns: fixed columns plus one column per selected extra field
     const columns = useMemo(() => [
         {
-            title: 'ID', dataIndex: 'id', key: 'id', ellipsis: false, width: 120
-        }, {
-            title: 'Name', dataIndex: 'name', key: 'name', ellipsis: false, width: 180
-        }, {
-            title: 'Adduct', dataIndex: 'adduct', key: 'adduct', ellipsis: false, width: 100
-        }, {
             title: 'Precursor m/z',
             dataIndex: 'precursor_mz',
             key: 'precursor_mz',
@@ -113,11 +107,9 @@ export default () => {
             const tableData = currentSearchScore.map((info, index) => {
                 const row = {
                     key: `${index}`,
-                    id: info[0]["library-id"],
                     score: info[1],
-                    name: info[0]["library-name"] || "",
                     delta_mz: info[0].precursor_mz - getAtomGlobalSpectrum.precursor_mz,
-                    adduct: info[0]["library-precursor_type"],
+
                     precursor_mz: info[0].precursor_mz,
                     idx: info[0]["library-idx"],
                     charge: getAtomGlobalSpectrum.charge
