@@ -141,7 +141,13 @@ class EntropySearch:
         for search_type in search_type_keys:
             new_data = []
             for query_idx, library_idx, score in spectrum_result[search_type]:
-                library_spec = self.spectral_library[library_idx]
+                # Load the library spec, without the peaks (to sent a bit lighter data), peak data is later loaded using main.get_one_spectrum, which calls get_one_library_spectrum, which includes the peaks
+                library_spec = {
+                    k: v
+                    for k, v in self.spectral_library[library_idx].items()
+                    if k != "peaks"
+                }
+                library_spec["library-idx"] = int(library_idx)
                 new_data.append([library_spec, score])
             spectrum_result[search_type] = new_data
 
