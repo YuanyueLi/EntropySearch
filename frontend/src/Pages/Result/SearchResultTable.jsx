@@ -138,7 +138,7 @@ export default () => {
                     onRow={record => ({
                         onClick: event => {
                             console.log(record);
-                            setAtomSelectedLibrary({charge: record.charge, idx: record.idx});
+                            setAtomSelectedLibrary({ charge: 0, idx: record.idx });
                         },
                     })}
                     rowClassName={record => {
