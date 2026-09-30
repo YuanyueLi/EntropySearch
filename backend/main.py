@@ -66,7 +66,6 @@ class InfoForEntropySearch(BaseModel):
 
 
 def run_entropy_search(info: dict):
-    print(info)
     global search_parameters
     search_parameters = info.copy()
     print("Start searching")
