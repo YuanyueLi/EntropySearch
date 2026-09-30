@@ -61,8 +61,6 @@ class InfoForEntropySearch(BaseModel):
     ms1_tolerance_in_da: float = 0.01
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
-    cores: int = 1
-    charge: int = 0
 
 
 def run_entropy_search(info: dict):
@@ -77,8 +75,6 @@ def run_entropy_search(info: dict):
         info["top_n"],
         info["ms1_tolerance_in_da"],
         info["ms2_tolerance_in_da"],
-        charge=info["charge"],
-        cores=info["cores"],
     )
     print("Finish searching")
     return None

@@ -207,8 +207,6 @@ class EntropySearch:
         top_n,
         ms1_tolerance_in_da,
         ms2_tolerance_in_da,
-        charge=None,
-        cores=1,
     ):
         # Search spectra
         file_query = Path(file_query)
@@ -410,6 +408,5 @@ if __name__ == "__main__":
         para["top_n"],
         para["ms1_tolerance_in_da"],
         para["ms2_tolerance_in_da"],
-        cores=para["cores"],
     )
     print(dynamic_entropy.all_spectra)
