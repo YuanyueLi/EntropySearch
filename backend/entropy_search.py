@@ -257,7 +257,8 @@ class EntropySearch:
             "error": False,
             "message": "Start loading spectral library...",
         }
-        if (file_library / "group_start.pkl").exists():
+        if file_library.name == "group_start.pkl":
+            file_library = file_library.parent
             self.spectral_library = DynamicEntropySearch(
                 path_data=file_library, max_ms2_tolerance_in_da=self.ms2_tolerance_in_da
             )
