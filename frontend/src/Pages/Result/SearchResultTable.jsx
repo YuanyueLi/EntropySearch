@@ -19,6 +19,12 @@ const atomLibraryInfo = atom([]);
 // them again in the "extra metadata" picker.
 const FIXED_FIELDS = ["precursor_mz"];
 
+// Extra metadata can be strings, numbers, arrays etc. so render it defensively.
+const formatValue = (v) => {
+    if (v === undefined || v === null) return "";
+    if (typeof v === "object") return JSON.stringify(v);
+    return String(v);
+};
 export default () => {
     const [getAtomGlobalSpectrum,] = useAtom(atomGlobalSpectrumData);
     const [getAtomSearchScore, setAtomSearchScore] = useAtom(atomSearchScore);
@@ -91,7 +97,11 @@ export default () => {
             dataIndex: field,
             key: field,
             ellipsis: true,
-            width: 140,
+            width: 150,
+            render: (_, record) => formatValue(record[field]),
+            sorter: (a, b) => String(a[field] ?? "").localeCompare(
+                String(b[field] ?? ""), undefined, { numeric: true }
+            ),
         })),
     ], [stateSelectedFields]);
 
