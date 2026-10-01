@@ -6,14 +6,40 @@ import VirtualTable from "../../Library/VirtualTable";
 import {
     atomGlobalSpectrumData,
     atomSelectedLibrary,
-    atomUpperSpectrumData,
-    atomLowerSpectrumData
 } from "../Global/Atoms";
 import { useRequest } from "ahooks";
 import { Parser } from "@json2csv/plainjs";
 
 const atomSearchScore = atom([]);
-const atomLibraryInfo = atom([]);
+
+const baseColumns = [
+    {
+        title: 'Precursor m/z',
+        dataIndex: 'precursor_mz',
+        key: 'precursor_mz',
+        sorter: (a, b) => a.precursor_mz - b.precursor_mz,
+        ellipsis: false,
+        width: 80,
+        render: (_, record) => record.precursor_mz.toFixed(3),
+    }, {
+        title: 'Delta mass',
+        dataIndex: 'delta_mz',
+        key: 'delta_mz',
+        sorter: (a, b) => a.delta_mz - b.delta_mz,
+        ellipsis: false,
+        width: 80,
+        render: (_, record) => record.delta_mz.toFixed(3),
+    }, {
+        title: 'Score',
+        dataIndex: 'score',
+        key: 'score',
+        sorter: (a, b) => a.score - b.score,
+        defaultSortOrder: 'descend',
+        ellipsis: false,
+        width: 60,
+        render: (_, record) => record.score.toFixed(3),
+    },
+];
 
 // Fields that already have a dedicated fixed column, so we don't offer
 // them again in the "extra metadata" picker.
@@ -64,34 +90,9 @@ export default () => {
     const [stateSelectedFields, setStateSelectedFields] = useState([]);
 
     ////////////////////////////////////////////////////////////////////////////////
-    // Table columns: fixed columns plus one column per selected extra field
+    // Fixed columns plus one column per selected extra field
     const columns = useMemo(() => [
-        {
-            title: 'Precursor m/z',
-            dataIndex: 'precursor_mz',
-            key: 'precursor_mz',
-            sorter: (a, b) => a.precursor_mz - b.precursor_mz,
-            ellipsis: false,
-            width: 80,
-            render: (_, record) => record.precursor_mz.toFixed(3),
-        }, {
-            title: 'Delta mass',
-            dataIndex: 'delta_mz',
-            key: 'delta_mz',
-            sorter: (a, b) => a.delta_mz - b.delta_mz,
-            ellipsis: false,
-            width: 80,
-            render: (_, record) => record.delta_mz.toFixed(3),
-        }, {
-            title: 'Score',
-            dataIndex: 'score',
-            key: 'score',
-            sorter: (a, b) => a.score - b.score,
-            defaultSortOrder: 'descend',
-            ellipsis: false,
-            width: 60,
-            render: (_, record) => record.score.toFixed(3),
-        },
+        ...baseColumns,
         ...stateSelectedFields.map(field => ({
             title: field.replace(/^library-/, ""),
             dataIndex: field,
