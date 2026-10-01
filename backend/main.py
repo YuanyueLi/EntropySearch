@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
 import base64
 import copy
 import datetime
@@ -12,7 +11,7 @@ import sys
 import numpy as np
 import uvicorn
 from entropy_search import EntropySearch
-from fastapi import BackgroundTasks, Depends, FastAPI
+from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -62,12 +61,9 @@ class InfoForEntropySearch(BaseModel):
     ms1_tolerance_in_da: float = 0.01
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
-    cores: int = 1
-    charge: int = 0
 
 
 def run_entropy_search(info: dict):
-    print(info)
     global search_parameters
     search_parameters = info.copy()
     print("Start searching")
@@ -75,7 +71,10 @@ def run_entropy_search(info: dict):
     entropy_search_worker = EntropySearch(info["ms2_tolerance_in_da"])
     entropy_search_worker.load_spectral_library(info["file_library"])
     entropy_search_worker.search_file_single_core(
-        info["file_query"], info["top_n"], info["ms1_tolerance_in_da"], info["ms2_tolerance_in_da"], charge=info["charge"], cores=info["cores"]
+        info["file_query"],
+        info["top_n"],
+        info["ms1_tolerance_in_da"],
+        info["ms2_tolerance_in_da"],
     )
     print("Finish searching")
     return None
@@ -93,7 +92,10 @@ async def entropy_search(info: InfoForEntropySearch, background_tasks: Backgroun
 async def get_one_spectrum(scan: int):
     try:
         spectrum_result = entropy_search_worker.get_one_spectrum_result(
-            scan, search_parameters["top_n"], search_parameters["ms1_tolerance_in_da"], search_parameters["ms2_tolerance_in_da"]
+            scan,
+            search_parameters["top_n"],
+            search_parameters["ms1_tolerance_in_da"],
+            search_parameters["ms2_tolerance_in_da"],
         )
         json_str = json.dumps(spectrum_result, cls=NumpyEncoder)
         return json.loads(json_str)
@@ -105,7 +107,7 @@ async def get_one_spectrum(scan: int):
 @app.get("/get/one_library_spectrum/{charge}/{idx}")
 async def get_one_library_spectrum(charge: int, idx: int):
     try:
-        spec_result = entropy_search_worker.get_one_library_spectrum(charge, idx)
+        spec_result = entropy_search_worker.get_one_library_spectrum(idx)
         json_str = json.dumps(spec_result, cls=NumpyEncoder)
         return json.loads(json_str)
     except Exception as e:
@@ -139,12 +141,27 @@ async def get_all_spectra():
 async def get_status():
     try:
         if entropy_search_worker is None:
-            return {"status": "Preparing to start searching", "is_ready": False, "is_running": False, "is_error": False}
+            return {
+                "status": "Preparing to start searching",
+                "is_ready": False,
+                "is_running": False,
+                "is_error": False,
+            }
         else:
             status = entropy_search_worker.status
-            return {"status": status["message"], "is_ready": status["ready"], "is_running": status["running"], "is_error": status["error"]}
+            return {
+                "status": status["message"],
+                "is_ready": status["ready"],
+                "is_running": status["running"],
+                "is_error": status["error"],
+            }
     except Exception as e:
-        return {"status": f"Error: {e}", "is_ready": False, "is_running": False, "is_error": True}
+        return {
+            "status": f"Error: {e}",
+            "is_ready": False,
+            "is_running": False,
+            "is_error": True,
+        }
 
 
 # Get maximum cpu cores
