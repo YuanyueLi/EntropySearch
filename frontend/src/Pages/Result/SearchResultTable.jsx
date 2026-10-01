@@ -61,7 +61,7 @@ export default () => {
         return Array.from(fieldSet).sort();
     }, [getAtomSearchScore, stateSearchType]);
 
-    const [stateSelectedFields, setStateSelectedFields] = useState(["library-id", "library-name", "library-precursor_type", "library-idx"]);
+    const [stateSelectedFields, setStateSelectedFields] = useState([]);
 
     ////////////////////////////////////////////////////////////////////////////////
     // Table columns: fixed columns plus one column per selected extra field
