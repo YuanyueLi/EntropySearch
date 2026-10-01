@@ -24,8 +24,6 @@ export default () => {
     const [getAtomSearchScore, setAtomSearchScore] = useAtom(atomSearchScore);
     const [getAtomSelectedLibrary, setAtomSelectedLibrary] = useAtom(atomSelectedLibrary);
 
-    const [, setAtomUpperSpectrumData] = useAtom(atomUpperSpectrumData);
-    const [, setAtomLowerSpectrumData] = useAtom(atomLowerSpectrumData);
 
     ////////////////////////////////////////////////////////////////////////////////
     // For search type
