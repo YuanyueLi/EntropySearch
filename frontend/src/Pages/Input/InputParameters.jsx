@@ -1,10 +1,10 @@
-import {useState, useEffect} from "react";
-import {Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal, Tooltip} from 'antd';
-import {UploadOutlined} from '@ant-design/icons';
-import {useRequest} from 'ahooks';
-import {url} from "../Global/Config";
-import {useAtom} from "jotai";
-import {atomShowModalInfo} from "./Main";
+import { useState, useEffect } from "react";
+import { Upload, Button, Form, Input, InputNumber, Row, Col, ConfigProvider, Modal, Tooltip } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { useRequest } from 'ahooks';
+import { url } from "../Global/Config";
+import { useAtom } from "jotai";
+import { atomShowModalInfo } from "./Main";
 
 const InputParameters = (showNext) => {
     const [, setShowModalInfo] = useAtom(atomShowModalInfo);
@@ -23,7 +23,7 @@ const InputParameters = (showNext) => {
         cores: 1
     }
     const formStyle2 = {
-        labelCol: {span: 16}, wrapperCol: {span: 8}
+        labelCol: { span: 16 }, wrapperCol: { span: 8 }
     }
     const validateMessages = {
         required: "Please input '${label}'",
@@ -61,27 +61,27 @@ const InputParameters = (showNext) => {
     };
 
     return <>
-        <br/>
+        <br />
         <Row align={"middle"} justify={"center"}>
             <Col span={22}>
-                <ConfigProvider form={{validateMessages}}>
+                <ConfigProvider form={{ validateMessages }}>
                     <Form name="basic" form={form}
-                          labelCol={{span: 5}} wrapperCol={{span: 18}}
-                          initialValues={defaultValues}
-                          onFinish={onFinish}
-                          autoComplete="off"
-                          requiredMark={false}>
+                        labelCol={{ span: 5 }} wrapperCol={{ span: 18 }}
+                        initialValues={defaultValues}
+                        onFinish={onFinish}
+                        autoComplete="off"
+                        requiredMark={false}>
                         <Form.Item label={"Spectral file to search"} name="file_query"
-                                   rules={[{required: true}]}>
+                            rules={[{ required: true }]}>
                             <InputFile fileFormat={".msp,.mzML,.mgf"}
-                                       placeholder={"The mzML, mgf, msp format is supported."}
-                                       onChange={(e) => {
-                                           let result = e
-                                           if (e.lastIndexOf('.')) {
-                                               result = e.substr(0, e.lastIndexOf('.'))
-                                           }
-                                           form.setFieldsValue({file_output: result + ".result.csv"})
-                                       }}/>
+                                placeholder={"The mzML, mgf, msp format is supported."}
+                                onChange={(e) => {
+                                    let result = e
+                                    if (e.lastIndexOf('.')) {
+                                        result = e.substr(0, e.lastIndexOf('.'))
+                                    }
+                                    form.setFieldsValue({ file_output: result + ".result.csv" })
+                                }} />
                         </Form.Item>
                         <Form.Item label={"Spectral library"} name="file_library"
                             rules={[{ required: true }]}>
@@ -98,22 +98,26 @@ const InputParameters = (showNext) => {
                             </Form.Item>
                         </Tooltip> */}
                         <Form.Item label={"Report top n hits"} name={"top_n"}
-                                   {...formStyle2}>
-                            <InputNumber min={1} step={10}/>
+                            {...formStyle2}>
+                            <InputNumber min={1} step={10} />
+                        </Form.Item>
+                        <Form.Item label={"Minimum similarity score"} name={"score_min"}
+                            {...formStyle2}>
+                            <InputNumber min={0.0} step={0.01} max={1.0} />
                         </Form.Item>
                         <Form.Item label={"Precursor m/z tolerance (in Da)"} name={"ms1_tolerance_in_da"}
-                                   {...formStyle2}>
-                            <InputNumber min={0.0001} step={0.01}/>
+                            {...formStyle2}>
+                            <InputNumber min={0.0001} step={0.01} />
                         </Form.Item>
                         <Form.Item label={"Product ions m/z tolerance (in Da)"} name={"ms2_tolerance_in_da"}
-                                   {...formStyle2}>
-                            <InputNumber min={0.0001} step={0.01}/>
+                            {...formStyle2}>
+                            <InputNumber min={0.0001} step={0.01} />
                         </Form.Item>
                         {/*<Form.Item label={"Threads used for search"} name={"cores"}*/}
                         {/*           {...formStyle2}>*/}
                         {/*    <IntegerInputNumber min={1} step={1}/>*/}
                         {/*</Form.Item>*/}
-                        <Form.Item wrapperCol={{offset: 10, span: 4}}>
+                        <Form.Item wrapperCol={{ offset: 10, span: 4 }}>
                             <Button type="primary" htmlType="submit">
                                 Start
                             </Button>
@@ -145,12 +149,12 @@ const FileSelector = (props) => {
 
     return <>
         <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined/>}>Select file</Button>
+            <Button icon={<UploadOutlined />}>Select file</Button>
         </Upload>
     </>
 }
 
-const InputFile = ({value = undefined, onChange, fileFormat, placeholder}) => {
+const InputFile = ({ value = undefined, onChange, fileFormat, placeholder }) => {
     const [stateFilePath, setFilePath] = useState(value)
 
     useEffect(() => {
@@ -162,16 +166,16 @@ const InputFile = ({value = undefined, onChange, fileFormat, placeholder}) => {
 
     return <Row justify={"space-between"}>
         <Col span={19}>
-            <Input onChange={(e) => setFilePath(e.target.value)} value={stateFilePath} placeholder={placeholder}/>
+            <Input onChange={(e) => setFilePath(e.target.value)} value={stateFilePath} placeholder={placeholder} />
         </Col>
         <Col span={4}>
-            <FileSelector setFile={setFilePath} fileFormat={fileFormat}/>
+            <FileSelector setFile={setFilePath} fileFormat={fileFormat} />
         </Col>
     </Row>
 }
 
 const IntegerInputNumber = (props) => {
-    const {defaultValue, min, placeholder} = props;
+    const { defaultValue, min, placeholder } = props;
     const [preValue, setPreValue] = useState(defaultValue ?? min ?? 0);
 
     const handleChange = (value) => {
@@ -196,7 +200,7 @@ const IntegerInputNumber = (props) => {
         return Math.abs(Number.parseInt(value, 10));
     };
 
-    const handleBlur = ({target: {value}}) => {
+    const handleBlur = ({ target: { value } }) => {
         if (value === "") {
             setPreValue(defaultValue);
         }
