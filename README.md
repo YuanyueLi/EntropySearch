@@ -17,3 +17,8 @@ libraries in real time. 04 April 2023, PREPRINT (Version 1) available at Researc
 # GUI
 ![Screenshot for GUI 1](./docs/images/GUI_start.png)
 ![Screenshot for GUI 2](./docs/images/GUI_result.png)
+
+# Development
+To run the GUI in development mode:
+First start the backend by running python backend/main.py
+Than in another terminal start the frontend by running yarn start while in the frontend folder
