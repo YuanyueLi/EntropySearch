@@ -84,9 +84,9 @@ const InputParameters = (showNext) => {
                                        }}/>
                         </Form.Item>
                         <Form.Item label={"Spectral library"} name="file_library"
-                                   rules={[{required: true}]}>
-                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2,.esi"}
-                                       placeholder={"The msp, lbm2, esi, mgf, mzML is supported."}/>
+                            rules={[{ required: true }]}>
+                            <InputFile fileFormat={".msp,.mgf,.mzML,.lbm2,.esi,.pkl"}
+                                placeholder={"msp, lbm2, esi, mgf, mzML and group_start.pkl is supported."} />
                         </Form.Item>
                         {/*<Form.Item label={"Result file"} name={"file_output"} required*/}
                         {/*           rules={[{required: true}]}>*/}
