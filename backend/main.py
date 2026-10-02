@@ -7,13 +7,14 @@ import multiprocessing
 import os
 import signal
 import sys
+from pathlib import Path
 
 import numpy as np
 import uvicorn
 from entropy_search import EntropySearch
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 app = FastAPI()
 app.add_middleware(
@@ -61,6 +62,18 @@ class InfoForEntropySearch(BaseModel):
     ms1_tolerance_in_da: float = 0.01
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
+
+    @validator("file_query", always=True)
+    def query_must_be_a_file(cls, v):
+        if not Path(v).is_file():
+            raise ValueError(f"Query file not found: '{v}'.")
+        return v
+
+    @validator("file_library", always=True)
+    def library_must_exist(cls, v):
+        if not Path(v).is_file():
+            raise ValueError(f"Library not found: '{v}'.")
+        return v
 
 
 def run_entropy_search(info: dict):
