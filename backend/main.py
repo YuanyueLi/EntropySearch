@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import uvicorn
 from entropy_search import EntropySearch
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, validator
 
@@ -198,7 +198,9 @@ async def read_root():
 
 # Exit
 @app.get("/exit")
-async def exit():
+async def exit(request: Request):
+    if request.client is None or request.client.host not in ("127.0.0.1", "::1"):
+        raise HTTPException(status_code=403, detail="Forbidden")
     try:
         entropy_search_worker.exit()
     except Exception as e:
