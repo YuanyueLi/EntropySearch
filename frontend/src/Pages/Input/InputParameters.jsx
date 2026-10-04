@@ -45,12 +45,12 @@ const InputParameters = (showNext) => {
             console.log(showNext)
             setShowModalInfo(true)
         },
-        onError: (data) => {
-            console.log(data)
-            Modal.error({
-                title: "Error!",
-                centered: true
-            })
+        onError: (error) => {
+            const detail = error.response?.data?.detail
+            const message = Array.isArray(detail)
+                ? detail.map(d => d.msg).join("\n")
+                : "Could not start the search"
+            Modal.error({ title: "Error!", content: message, centered: true })
         }
     });
 
