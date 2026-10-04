@@ -50,7 +50,7 @@ class EntropySearch:
         }
 
     def search_one_spectrum(
-        self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+        self, spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, score_min
     ):
         spec = _parse_spectrum(spec)
         result = {
@@ -92,7 +92,7 @@ class EntropySearch:
                     top_n_score = score_array
 
                 # Filter by score > 0
-                selected_idx = top_n_score > 0
+                selected_idx = top_n_score > score_min
                 top_n_idx = top_n_idx[selected_idx]
                 top_n_score = top_n_score[selected_idx]
 
@@ -207,6 +207,7 @@ class EntropySearch:
         top_n,
         ms1_tolerance_in_da,
         ms2_tolerance_in_da,
+        score_min: float,
     ):
         # Search spectra
         file_query = Path(file_query)
@@ -233,7 +234,7 @@ class EntropySearch:
                 )
 
                 cur_result = self.search_one_spectrum(
-                    spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da
+                    spec, top_n, ms1_tolerance_in_da, ms2_tolerance_in_da, score_min
                 )
                 if cur_result is not None:
                     spec_idx = self.scan_number_to_index[cur_result["scan"]]
@@ -409,5 +410,6 @@ if __name__ == "__main__":
         para["top_n"],
         para["ms1_tolerance_in_da"],
         para["ms2_tolerance_in_da"],
+        0.0,
     )
     print(dynamic_entropy.all_spectra)

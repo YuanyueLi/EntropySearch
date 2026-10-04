@@ -62,6 +62,7 @@ class InfoForEntropySearch(BaseModel):
     ms1_tolerance_in_da: float = 0.01
     ms2_tolerance_in_da: float = 0.02
     top_n: int = 100
+    score_min: float = 0.5
 
     @validator("file_query", always=True)
     def query_must_be_a_file(cls, v):
@@ -88,6 +89,7 @@ def run_entropy_search(info: dict):
         info["top_n"],
         info["ms1_tolerance_in_da"],
         info["ms2_tolerance_in_da"],
+        info["score_min"],
     )
     print("Finish searching")
     return None
